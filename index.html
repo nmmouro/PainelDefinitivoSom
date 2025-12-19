@@ -89,6 +89,23 @@ td:last-child{
 td.status-icon{
   font-size:20px;
 }
+  .status-icon{
+  font-size:22px;
+  font-weight:900;
+}
+
+.status-ok{
+  color:#22c55e; /* verde */
+}
+
+.status-wait{
+  color:#facc15; /* amarelo */
+}
+
+.status-cancel{
+  color:#ef4444; /* vermelho */
+}
+
 
 tr.status-atendido{background:rgba(147,219,112,0.18)}
 tr.status-andamento{background:rgba(219,147,112,0.18)}
@@ -220,15 +237,26 @@ function renderTable(id,g){
     h+=`<tr class="${cls}">`;
 
     cells.forEach((c,i)=>{
-      if(i===cells.length-1){
-        h+=`<td class="status-icon">${
-          status.includes("concluido")||status.includes("atendido")?"✔":
-          status.includes("andamento")?"⏳":
-          status.includes("cancelado")?"✖":""
-        }</td>`;
-      }else{
-        h+=`<td>${escapeHtml(formatCell(c))}</td>`;
-      }
+      if (i === cells.length - 1) {
+  let icon = "";
+  let iconClass = "";
+
+  if (status.includes("concluido") || status.includes("atendido")) {
+    icon = "✔";
+    iconClass = "status-ok";
+  } 
+  else if (status.includes("andamento")) {
+    icon = "⏳";
+    iconClass = "status-wait";
+  } 
+  else if (status.includes("cancelado")) {
+    icon = "✖";
+    iconClass = "status-cancel";
+  }
+
+  h += `<td class="status-icon ${iconClass}">${icon}</td>`;
+}
+
     });
 
     h+="</tr>";
