@@ -214,9 +214,28 @@ function renderTable(id,g){
     return;
   }
 
-  const cols = g.table.cols.map((c,i,arr) =>
-  (i === arr.length - 1 && !c.label) ? "STATUS" : (c.label || "")
-);
+  const DEFAULT_HEADERS = [
+  "Data",
+  "Hora",
+  "Veículo",
+  "Empregado",
+  "Passageiro/M",
+  "ORIGEM",
+  "DESTINO",
+  "OBSERVAÇÃO",
+  "STATUS"
+];
+
+const cols = g.table.cols.map((c, i, arr) => {
+  if (c.label) return c.label;
+
+  // última coluna sempre STATUS
+  if (i === arr.length - 1) return "STATUS";
+
+  // fallback por posição
+  return DEFAULT_HEADERS[i] || `COLUNA ${i + 1}`;
+});
+
 
   const rows=g.table.rows||[];
 
