@@ -176,11 +176,20 @@ const formatCell=c=>{
 };
 
 /* ================= STATUS CHANGE ================= */
-function detectStatusChange(key,g){
-  if(!g?.table?.rows) return;
-  const cur=g.table.rows.map(r=>String(r.c?.at(-1)?.f ?? r.c?.at(-1)?.v ?? "").toLowerCase());
-  if(previousStatus[key].length && cur.some((s,i)=>s!==previousStatus[key][i])) playbeep();
-  previousStatus[key]=cur;
+function detectStatusChange(key, g){
+  if (!g?.table?.rows) return;
+
+  const current = g.table.rows.map(r =>
+    String(r.c?.at(-1)?.f ?? r.c?.at(-1)?.v ?? "").toLowerCase()
+  );
+
+  // Só compara se já houver histórico (evita som no primeiro carregamento)
+  if (previousStatus[key].length) {
+    const changed = current.some((s, i) => s !== previousStatus[key][i]);
+    if (changed) playBeep();
+  }
+
+  previousStatus[key] = current;
 }
 
 /* ================= RENDER ================= */
