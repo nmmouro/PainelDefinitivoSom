@@ -237,9 +237,11 @@ function renderTable(id,g){
           h+=`<td class="status-icon">⏳</td>`;
         else
           h+=`<td></td>`;
-      }else{
-        h+=`<td>${escapeHtml(formatCell(c))}</td>`;
       }
+      else{
+  html += `<td></td>`; // ✅ status vazio = célula vazia
+}
+
     });
 
     h+="</tr>";
