@@ -238,11 +238,11 @@ function renderTable(id,g){
         else
           h+=`<td></td>`;
       }
-      else{
-  html += `<td></td>`; // ✅ status vazio = célula vazia
-}
+        else{
+          html += `<td>${escapeHtml(raw)}</td>`;
+      }
 
-    });
+   });
 
     h+="</tr>";
   });
