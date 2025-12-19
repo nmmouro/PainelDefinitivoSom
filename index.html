@@ -54,7 +54,7 @@ main{
 }
 
 .card h2{
-  margin:1 1 8px;
+  margin:0 0 8px;
   color:var(--accent);
   font-size:18px;
   text-align:center;
@@ -67,29 +67,22 @@ table{
 }
 
 th,td{
-  padding:12px 36px; /* ⬅ aumenta o espaço ENTRE colunas */
-  border-radius:10px;
+  padding:12px 36px;
   font-weight:700;
   text-align:center;
   white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
 }
 
 thead th{
   position:sticky;
   top:0;
-  z-index:1000;
   background:#0435bf;
-  padding:10px;
-  text-align:center;
+  z-index:2;
 }
 
 th:last-child,
 td:last-child{
-  border-right:none;
   width:50px;
-  text-align:center;
 }
 
 td.status-icon{
@@ -98,7 +91,7 @@ td.status-icon{
 
 tr.status-atendido{background:rgba(147,219,112,0.18)}
 tr.status-andamento{background:rgba(219,147,112,0.18)}
-tr.status-concluido{background:rgba(0,200,120,0.06)}
+tr.status-concluido{background:rgba(0,200,120,0.10)}
 
 .small{
   text-align:center;
@@ -135,7 +128,6 @@ tr.status-concluido{background:rgba(0,200,120,0.06)}
 
 <div class="small">Atualização automática a cada 60s • Google Sheets</div>
 
-<!-- 🔊 ÁUDIO -->
 <audio id="beep">
   <source src="alerta.mp3" type="audio/mpeg">
 </audio>
@@ -147,71 +139,47 @@ const TAB_PAINEL = "PAINEL";
 const TAB_AGENDA = "AGENDA DO DIA";
 const TAB_SS = "AGENDA SERVIÇO SOCIAL";
 
-/* ================= MEMÓRIA DE STATUS (NOVO) ================= */
-const previousStatus = {
-  painel: [],
-  agenda: [],
-  social: []
+/* ================= HEADERS ================= */
+const TABLE_HEADERS = {
+  painel: ["Data","Hora","Veículo","Empregado","Passageiro/Motivo","Itinerário","STATUS"],
+  agenda: ["Data","Hora","Passageiro","Setor","Motivo","Itinerário","STATUS"],
+  social: ["Data","Período","Passageiro","Motivo","Itinerário","STATUS"]
 };
 
-/* ================= SOM (NOVO) ================= */
+/* ================= STATUS MEM ================= */
+const previousStatus = { painel:[], agenda:[], social:[] };
+
+/* ================= SOM ================= */
 function playBeep(){
-  const a = document.getElementById("beep");
-  if(!a) return;
-  a.currentTime = 0;
-  a.play().catch(()=>{});
+  const a=document.getElementById("beep");
+  if(a){ a.currentTime=0; a.play().catch(()=>{}); }
 }
 
 /* ================= RELÓGIO ================= */
 function updateClock(){
-  const n = new Date();
-  clock.innerText =
-    n.toLocaleDateString("pt-BR") +
-    " — " +
-    n.toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
+  const n=new Date();
+  document.getElementById("clock").innerText =
+    n.toLocaleDateString("pt-BR")+" — "+
+    n.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 }
-
 setInterval(updateClock,1000);
 updateClock();
 
 /* ================= HELPERS ================= */
-function parseGvizText(t){
-  return JSON.parse(t.substring(t.indexOf("{"),t.lastIndexOf("}")+1));
-}
-
-function escapeHtml(s){
-  return String(s ?? "").replace(/[&<>]/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;" }[m]));
-}
-
-function formatCell(c){
+const parseGvizText=t=>JSON.parse(t.substring(t.indexOf("{"),t.lastIndexOf("}")+1));
+const escapeHtml=s=>String(s??"").replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
+const formatCell=c=>{
   if(c==null) return "";
-  if(typeof c==="object"){
-    if(c.f!=null) return c.f;
-    if(c.v!=null) return formatCell(c.v);
-    return "";
-  }
+  if(typeof c==="object") return c.f ?? formatCell(c.v);
   return String(c);
-}
+};
 
-/* ================= DETECTA MUDANÇA (NOVO) ================= */
-function detectStatusChange(key, g){
+/* ================= STATUS CHANGE ================= */
+function detectStatusChange(key,g){
   if(!g?.table?.rows) return;
-
-  const current = g.table.rows.map(r=>{
-    const c = r.c || [];
-    const last = c[c.length-1];
-    return String(last?.f ?? last?.v ?? "").toLowerCase();
-  });
-
-  if(previousStatus[key].length){
-    if(current.some((s,i)=>s!==previousStatus[key][i])){
-      playBeep();
-    }
-  }
-  previousStatus[key] = current;
+  const cur=g.table.rows.map(r=>String(r.c?.at(-1)?.f ?? r.c?.at(-1)?.v ?? "").toLowerCase());
+  if(previousStatus[key].length && cur.some((s,i)=>s!==previousStatus[key][i])) playBeep();
+  previousStatus[key]=cur;
 }
 
 /* ================= RENDER ================= */
@@ -222,58 +190,8 @@ function renderTable(id,g){
     return;
   }
 
-  const TABLE_HEADERS = {
-  painel: [
-    "Data",
-    "Hora",
-    "Veículo",
-    "Empregado",
-    "Passageiro/Motivo",
-    "Itinerário",
-    "Status"
-  ],
-
-  agenda: [
-    "Data",
-    "Hora",
-    "Passageiro",
-    "Setor",
-    "Motivo",
-    "Itinerário",
-    "STATUS"
-  ],
-
-  social: [
-    "Data",
-    "Período",
-    "Passageiro",
-    "Motivo",
-    "Itinerário",
-    "STATUS"
-  ]
-};
-
-
-const headersByTable = {
-  painel: TABLE_HEADERS.painel,
-  agenda: TABLE_HEADERS.agenda,
-  social: TABLE_HEADERS.social
-};
-
-const defaultHeaders = headersByTable[id] || [];
-
-const cols = g.table.cols.map((c, i, arr) => {
-  if (c.label) return c.label;
-
-  // última coluna sempre STATUS
-  if (i === arr.length - 1) return "STATUS";
-
-  // cabeçalho específico da tabela
-  return defaultHeaders[i] || `COLUNA ${i + 1}`;
-});
-
-
-
+  const headers=TABLE_HEADERS[id]||[];
+  const cols=g.table.cols.map((c,i)=>c.label||headers[i]||`COL ${i+1}`);
   const rows=g.table.rows||[];
 
   let h="<table><thead><tr>";
@@ -282,12 +200,10 @@ const cols = g.table.cols.map((c, i, arr) => {
 
   rows.forEach(r=>{
     const cells=r.c||[];
-    const last=cells[cells.length-1];
-    const status=String(last?.f??last?.v??"").toLowerCase();
+    const status=String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
 
     let cls="";
-    if(status.includes("cancelado"))cls="status-cancelado";
-    else if(status.includes("concluido"))cls="status-concluido";
+    if(status.includes("concluido"))cls="status-concluido";
     else if(status.includes("andamento"))cls="status-andamento";
     else if(status.includes("atendido"))cls="status-atendido";
 
@@ -295,14 +211,11 @@ const cols = g.table.cols.map((c, i, arr) => {
 
     cells.forEach((c,i)=>{
       if(i===cells.length-1){
-        if(status.includes("concluido")||status.includes("atendido"))
-          h+=`<td class="status-icon">✔</td>`;
-        else if(status.includes("cancelado"))
-          h+=`<td class="status-icon">✖</td>`;
-        else if(status.includes("andamento"))
-          h+=`<td class="status-icon">⏳</td>`;
-        else
-          h+=`<td></td>`;
+        h+=`<td class="status-icon">${
+          status.includes("concluido")||status.includes("atendido")?"✔":
+          status.includes("andamento")?"⏳":
+          status.includes("cancelado")?"✖":""
+        }</td>`;
       }else{
         h+=`<td>${escapeHtml(formatCell(c))}</td>`;
       }
@@ -339,9 +252,7 @@ async function loadAll(){
     renderTable("agenda",a);
     renderTable("social",s);
 
-  }catch(e){
-    console.error(e);
-  }
+  }catch(e){ console.error(e); }
 }
 
 loadAll();
