@@ -86,14 +86,20 @@ td:last-child{
   width:50px;
 }
 
-td.status-icon{
+ /* ================= CORES DE STATUS ================= */
+.status-icon{
   font-size:20px;
+  font-weight:900;
 }
-  /* ================= CORES DE STATUS ================= */
-tr.status-atendido   td.status-icon{color:#00ff9c;}
-tr.status-cancelado  td.status-icon{color:#ff4d4d;}
-tr.status-andamento  td.status-icon{color:#ffcc00;}
-tr.status-concluido  td.status-icon{color:#7CFC00;}
+
+.status-atendido-icon{
+  color:#22c55e; /* verde */
+}
+
+.status-cancelado-icon{
+  color:#ef4444; /* vermelho */
+}
+
 
 tr.status-atendido{background:rgba(147,219,112,0.18)}
 tr.status-andamento{background:rgba(219,147,112,0.18)}
@@ -209,9 +215,13 @@ function renderTable(id,g){
     const status=String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
 
     let cls="";
-    if(status.includes("concluido"))cls="status-concluido";
-    else if(status.includes("andamento"))cls="status-andamento";
-    else if(status.includes("atendido"))cls="status-atendido";
+    if(status.includes("concluido") || status.includes("atendido")){
+  h+=`<td class="status-icon status-atendido-icon">✔</td>`;
+}
+else if(status.includes("cancelado")){
+  h+=`<td class="status-icon status-cancelado-icon">✖</td>`;
+}
+
 
     h+=`<tr class="${cls}">`;
 
