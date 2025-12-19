@@ -214,7 +214,10 @@ function renderTable(id,g){
     return;
   }
 
-  const cols=g.table.cols.map(c=>c.label||"");
+  const cols = g.table.cols.map((c,i,arr) =>
+  (i === arr.length - 1 && !c.label) ? "STATUS" : (c.label || "")
+);
+
   const rows=g.table.rows||[];
 
   let h="<table><thead><tr>";
