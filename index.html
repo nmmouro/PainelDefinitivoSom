@@ -54,7 +54,9 @@ main{
 }
 
 .card h2{
+  margin:1 1 8px;
   color:var(--accent);
+  font-size:18px;
   text-align:center;
 }
 
@@ -76,12 +78,17 @@ th,td{
 thead th{
   position:sticky;
   top:0;
+  z-index:1000;
   background:#0435bf;
+  padding:10px;
+  text-align:center;
 }
 
 th:last-child,
 td:last-child{
+  border-right:none;
   width:50px;
+  text-align:center;
 }
 
 td.status-icon{
