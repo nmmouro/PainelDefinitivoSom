@@ -134,9 +134,10 @@ tr.status-concluido{background:rgba(0,200,120,0.10)}
 
 <div class="small">Atualização automática a cada 60s • Google Sheets</div>
 
-<audio id="Beep">
+<audio id="beep">
   <source src="alerta.mp3" type="audio/mpeg">
 </audio>
+
 
 <script>
 /* ================= CONFIG ================= */
@@ -157,130 +158,136 @@ const previousStatus = { painel:[], agenda:[], social:[] };
 
 /* ================= SOM ================= */
 function playBeep(){
-  const a=document.getElementById("beep");
-  if(a){ a.currentTime=0; a.play().catch(()=>{});}
+  const a = document.getElementById("beep");
+  if(a){
+    a.currentTime = 0;
+    a.play().catch(()=>{});
+  }
 }
 
 /* ================= RELÓGIO ================= */
 function updateClock(){
-  const n=new Date();
+  const n = new Date();
   document.getElementById("clock").innerText =
-    n.toLocaleDateString("pt-BR")+" — "+
+    n.toLocaleDateString("pt-BR") + " — " +
     n.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 }
 setInterval(updateClock,1000);
 updateClock();
 
 /* ================= HELPERS ================= */
-const parseGvizText=t=>JSON.parse(t.substring(t.indexOf("{"),t.lastIndexOf("}")+1));
-const escapeHtml=s=>String(s??"").replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));
-const formatCell=c=>{
-  if(c==null) return "";
-  if(typeof c==="object") return c.f ?? formatCell(c.v);
+const parseGvizText = t =>
+  JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}") + 1));
+
+const escapeHtml = s =>
+  String(s ?? "").replace(/[&<>]/g,m=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;"
+  }[m]));
+
+const formatCell = c => {
+  if(c == null) return "";
+  if(typeof c === "object") return c.f ?? formatCell(c.v);
   return String(c);
 };
 
 /* ================= STATUS CHANGE ================= */
 function detectStatusChange(key, g){
-  if (!g?.table?.rows) return;
+  if(!g?.table?.rows) return;
 
   const current = g.table.rows.map(r =>
     String(r.c?.at(-1)?.f ?? r.c?.at(-1)?.v ?? "").toLowerCase()
   );
 
-  // Só compara se já houver histórico (evita som no primeiro carregamento)
-  if (previousStatus[key].length) {
-    const changed = current.some((s, i) => s !== previousStatus[key][i]);
-    if (changed) playBeep();
+  if(previousStatus[key].length){
+    const changed = current.some((s,i)=>s !== previousStatus[key][i]);
+    if(changed) playBeep();
   }
 
   previousStatus[key] = current;
 }
 
 /* ================= RENDER ================= */
-function renderTable(id,g){
-  const el=document.getElementById(id);
+function renderTable(id, g){
+  const el = document.getElementById(id);
   if(!g?.table?.cols){
-    el.innerHTML="<div style='text-align:center;opacity:.7'>Sem dados</div>";
+    el.innerHTML = "<div style='text-align:center;opacity:.7'>Sem dados</div>";
     return;
   }
 
-  const headers=TABLE_HEADERS[id]||[];
-  const cols=g.table.cols.map((c,i)=>c.label||headers[i]||`COL ${i+1}`);
-  const rows=g.table.rows||[];
+  const headers = TABLE_HEADERS[id] || [];
+  const cols = g.table.cols.map((c,i)=>c.label || headers[i] || `COL ${i+1}`);
+  const rows = g.table.rows || [];
 
-  let h="<table><thead><tr>";
-  cols.forEach(c=>h+=`<th>${escapeHtml(c)}</th>`);
-  h+="</tr></thead><tbody>";
+  let h = "<table><thead><tr>";
+  cols.forEach(c => h += `<th>${escapeHtml(c)}</th>`);
+  h += "</tr></thead><tbody>";
 
   rows.forEach(r=>{
-    const cells=r.c||[];
-    const status=String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
+    const cells = r.c || [];
+    const status = String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
 
-    if(status.includes("cancelado"))cls="status-cancelado";
-    else if(status.includes("concluido"))cls="status-concluido";
-    else if(status.includes("andamento"))cls="status-andamento";
-    else if(status.includes("atendido"))cls="status-atendido";
+    let cls = "";
+    if(status.includes("cancelado")) cls="status-cancelado";
+    else if(status.includes("concluido")) cls="status-concluido";
+    else if(status.includes("andamento")) cls="status-andamento";
+    else if(status.includes("atendido")) cls="status-atendido";
 
-    html+=`<tr class="${cls}">`;
+    h += `<tr class="${cls}">`;
 
-   
-    
     cells.forEach((c,i)=>{
-       const raw=formatCell(c);
-      if(i===cells.length-1){
-        if(status.includes("concluido")||status.includes("atendido"))
-          html+=`<td class="status-icon">✔</td>`;
-        else if(status.includes("cancelado"))
-          html+=`<td class="status-icon">✖</td>`;
-        else if(status.includes("andamento"))
-          html+=`<td class="status-icon">⏳</td>`;
-        else
-          html+=`<td>${escapeHtml(raw)}</td>`;
-      }
-       else{
-          html += `<td>${escapeHtml(raw)}</td>`;
-      }
+      const raw = formatCell(c);
 
+      if(i === cells.length - 1){
+        let icon = "";
+        if(status.includes("concluido") || status.includes("atendido")) icon="✔";
+        else if(status.includes("cancelado")) icon="✖";
+        else if(status.includes("andamento")) icon="⏳";
+
+        h += `<td class="status-icon">${icon}</td>`;
+      } else {
+        h += `<td>${escapeHtml(raw)}</td>`;
+      }
     });
 
-    h+="</tr>";
+    h += "</tr>";
   });
 
-  h+="</tbody></table>";
-  el.innerHTML=h;
+  h += "</tbody></table>";
+  el.innerHTML = h;
 }
 
 /* ================= FETCH ================= */
 async function fetchSheet(tab){
-  const u=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(tab)}&tqx=out:json&nocache=${Date.now()}`;
-  const r=await fetch(u,{cache:"no-store"});
+  const u = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(tab)}&tqx=out:json&nocache=${Date.now()}`;
+  const r = await fetch(u,{cache:"no-store"});
   return parseGvizText(await r.text());
 }
 
 /* ================= LOAD ================= */
 async function loadAll(){
   try{
-    const [p,a,s]=await Promise.all([
+    const [p,a,s] = await Promise.all([
       fetchSheet(TAB_PAINEL),
       fetchSheet(TAB_AGENDA),
       fetchSheet(TAB_SS)
     ]);
 
-    detectStatusChange("painel",p);
-    detectStatusChange("agenda",a);
-    detectStatusChange("social",s);
+    detectStatusChange("painel", p);
+    detectStatusChange("agenda", a);
+    detectStatusChange("social", s);
 
-    renderTable("painel",p);
-    renderTable("agenda",a);
-    renderTable("social",s);
-
-  }catch(e){ console.error(e); }
+    renderTable("painel", p);
+    renderTable("agenda", a);
+    renderTable("social", s);
+  }catch(e){
+    console.error(e);
+  }
 }
 
 loadAll();
-setInterval(loadAll,60000);
+setInterval(loadAll, 60000);
 </script>
+
 
 </body>
 </html>
