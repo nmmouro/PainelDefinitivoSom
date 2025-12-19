@@ -215,13 +215,10 @@ function renderTable(id,g){
     const status=String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
 
     let cls="";
-    if(status.includes("concluido") || status.includes("atendido")){
-  h+=`<td class="status-icon status-atendido-icon">✔</td>`;
-}
-else if(status.includes("cancelado")){
-  h+=`<td class="status-icon status-cancelado-icon">✖</td>`;
-}
-
+    if(status.includes("cancelado"))cls="status-cancelado";
+    else if(status.includes("concluido"))cls="status-concluido";
+    else if(status.includes("andamento"))cls="status-andamento";
+    else if(status.includes("atendido"))cls="status-atendido";
 
     h+=`<tr class="${cls}">`;
 
