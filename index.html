@@ -176,7 +176,7 @@ function parseGvizText(t){
 }
 
 function escapeHtml(s){
-  return String(s ?? "").replace(/[&<>]/g,m=>({ "&":"&amp;","<":"&lt;"," }[m]));
+  return String(s ?? "").replace(/[&<>]/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;" }[m]));
 }
 
 function formatCell(c){
