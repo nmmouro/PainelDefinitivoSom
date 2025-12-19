@@ -86,20 +86,9 @@ td:last-child{
   width:50px;
 }
 
- /* ================= CORES DE STATUS ================= */
-.status-icon{
+td.status-icon{
   font-size:20px;
-  font-weight:900;
 }
-
-.status-atendido-icon{
-  color:#22c55e; /* verde */
-}
-
-.status-cancelado-icon{
-  color:#ef4444; /* vermelho */
-}
-
 
 tr.status-atendido{background:rgba(147,219,112,0.18)}
 tr.status-andamento{background:rgba(219,147,112,0.18)}
@@ -215,31 +204,22 @@ function renderTable(id,g){
     const status=String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
 
     let cls="";
-    if(status.includes("cancelado"))cls="status-cancelado";
-    else if(status.includes("concluido"))cls="status-concluido";
+    if(status.includes("concluido"))cls="status-concluido";
     else if(status.includes("andamento"))cls="status-andamento";
     else if(status.includes("atendido"))cls="status-atendido";
 
     h+=`<tr class="${cls}">`;
 
     cells.forEach((c,i)=>{
-      let icon = "";
-let iconClass = "status-icon";
-
-if (status.includes("concluido") || status.includes("atendido")) {
-  icon = "✔";
-  iconClass += " status-atendido-icon";
-}
-else if (status.includes("cancelado")) {
-  icon = "✖";
-  iconClass += " status-cancelado-icon";
-}
-else if (status.includes("andamento")) {
-  icon = "⏳";
-}
-
-h += `<td class="${iconClass}">${icon}</td>`;
-
+      if(i===cells.length-1){
+        h+=`<td class="status-icon">${
+          status.includes("concluido")||status.includes("atendido")?"✔":
+          status.includes("andamento")?"⏳":
+          status.includes("cancelado")?"✖":""
+        }</td>`;
+      }else{
+        h+=`<td>${escapeHtml(formatCell(c))}</td>`;
+      }
     });
 
     h+="</tr>";
