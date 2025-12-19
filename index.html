@@ -238,9 +238,9 @@ function renderTable(id,g){
         else
           h+=`<td></td>`;
       }
-        else{
-          html += `<td>${escapeHtml(raw)}</td>`;
+        h+=`<td>${escapeHtml(formatCell(c))}</td>`;
       }
+
 
    });
 
