@@ -165,12 +165,15 @@ function playBeep(){
 /* ================= RELÓGIO ================= */
 function updateClock(){
   const n = new Date();
-  clock.innerText = n.toLocaleDateString("pt-BR")+" — "+n.toLocaleTimeString("pt-BR");
-  n.toLocaleTimeString("pt-BR", {
+  clock.innerText =
+    n.toLocaleDateString("pt-BR") +
+    " — " +
+    n.toLocaleTimeString("pt-BR", {
       hour: "2-digit",
       minute: "2-digit"
     });
 }
+
 setInterval(updateClock,1000);
 updateClock();
 
