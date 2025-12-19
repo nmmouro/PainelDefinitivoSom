@@ -217,12 +217,12 @@ function renderTable(id,g){
     const cells=r.c||[];
     const status=String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
 
-    let cls="";
-    if(status.includes("concluido"))cls="status-concluido";
+    if(status.includes("cancelado"))cls="status-cancelado";
+    else if(status.includes("concluido"))cls="status-concluido";
     else if(status.includes("andamento"))cls="status-andamento";
     else if(status.includes("atendido"))cls="status-atendido";
 
-    h+=`<tr class="${cls}">`;
+    html+=`<tr class="${cls}">`;
 
    
     
