@@ -89,6 +89,11 @@ td:last-child{
 td.status-icon{
   font-size:20px;
 }
+  /* ================= CORES DE STATUS ================= */
+tr.status-atendido   td.status-icon{color:#00ff9c;}
+tr.status-cancelado  td.status-icon{color:#ff4d4d;}
+tr.status-andamento  td.status-icon{color:#ffcc00;}
+tr.status-concluido  td.status-icon{color:#7CFC00;}
  
 tr.status-atendido{background:rgba(147,219,112,0.18)}
 tr.status-andamento{background:rgba(219,147,112,0.18)}
@@ -219,26 +224,23 @@ function renderTable(id,g){
 
     h+=`<tr class="${cls}">`;
 
+   
+    
     cells.forEach((c,i)=>{
-      if (i === cells.length - 1) {
-  let icon = "";
-  let iconClass = "";
-
-  if (status.includes("concluido") || status.includes("atendido")) {
-    icon = "✔";
-    iconClass = "status-ok";
-  } 
-  else if (status.includes("andamento")) {
-    icon = "⏳";
-    iconClass = "status-wait";
-  } 
-  else if (status.includes("cancelado")) {
-    icon = "✖";
-    iconClass = "status-cancel";
-  }
-
-  h += `<td class="status-icon ${iconClass}">${icon}</td>`;
-}
+       const raw=formatCell(c);
+      if(i===cells.length-1){
+        if(status.includes("concluido")||status.includes("atendido"))
+          html+=`<td class="status-icon">✔</td>`;
+        else if(status.includes("cancelado"))
+          html+=`<td class="status-icon">✖</td>`;
+        else if(status.includes("andamento"))
+          html+=`<td class="status-icon">⏳</td>`;
+        else
+          html+=`<td>${escapeHtml(raw)}</td>`;
+      }
+       else{
+          html += `<td>${escapeHtml(raw)}</td>`;
+      }
 
     });
 
