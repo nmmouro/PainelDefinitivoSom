@@ -214,16 +214,45 @@ function renderTable(id,g){
     return;
   }
 
-  const DEFAULT_HEADERS = [
-  "Data",
-  "Hora",
-  "Veículo",
-  "Empregado",
-  "Passageiro/Motivo",
+  const TABLE_HEADERS = {
+  painel: [
+    "DATA",
+    "HORA",
+    "VEÍCULO",
+    "Empregado",
+    "Passageiro/Motivo",
+    "Itinerário",
+    "Status"
+  ],
+
+  agenda: [
+    "Data",
+    "HORA",
     "Passageiro",
-  "Itinerário",
-  "STATUS"
-];
+    "Setor",
+    "Motivo",
+    "Itinerário",
+    "STATUS"
+  ],
+
+  social: [
+    "Data",
+    "HORA",
+    "Passageiro",
+    "Motivo",
+    "Itinerário",
+    "STATUS"
+  ]
+};
+
+
+const headersByTable = {
+  painel: TABLE_HEADERS.painel,
+  agenda: TABLE_HEADERS.agenda,
+  social: TABLE_HEADERS.social
+};
+
+const defaultHeaders = headersByTable[id] || [];
 
 const cols = g.table.cols.map((c, i, arr) => {
   if (c.label) return c.label;
@@ -231,9 +260,10 @@ const cols = g.table.cols.map((c, i, arr) => {
   // última coluna sempre STATUS
   if (i === arr.length - 1) return "STATUS";
 
-  // fallback por posição
-  return DEFAULT_HEADERS[i] || `COLUNA ${i + 1}`;
+  // cabeçalho específico da tabela
+  return defaultHeaders[i] || `COLUNA ${i + 1}`;
 });
+
 
 
   const rows=g.table.rows||[];
