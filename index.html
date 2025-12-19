@@ -127,7 +127,7 @@ tr.status-concluido{background:rgba(0,200,120,0.10)}
   </section>
 </main>
 
-<div class="small">Atualização automática a cada 60s • Google Sheets</div>
+<div class="small">Atualização automática a cada 30s • Google Sheets</div>
 
 <audio id="beep">
   <source src="alerta.mp3" type="audio/mpeg">
@@ -179,7 +179,7 @@ const formatCell=c=>{
 function detectStatusChange(key,g){
   if(!g?.table?.rows) return;
   const cur=g.table.rows.map(r=>String(r.c?.at(-1)?.f ?? r.c?.at(-1)?.v ?? "").toLowerCase());
-  if(previousStatus[key].length && cur.some((s,i)=>s!==previousStatus[key][i])) playBeep();
+  if(previousStatus[key].length && cur.some((s,i)=>s!==previousStatus[key][i])) playbeep();
   previousStatus[key]=cur;
 }
 
