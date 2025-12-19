@@ -154,7 +154,7 @@ const TABLE_HEADERS = {
 };
 
 /* ================= STATUS MEM ================= */
-const previousStatus = { painel:[], agenda:[], social:[] };
+const statusMemory = {painel: [], agenda: [], social: []};
 
 /* ================= SOM ================= */
 function playBeep(){
@@ -191,19 +191,27 @@ const formatCell = c => {
 };
 
 /* ================= STATUS CHANGE ================= */
-function detectStatusChange(key, g){
-  if(!g?.table?.rows) return;
-
-  const current = g.table.rows.map(r =>
-    String(r.c?.at(-1)?.f ?? r.c?.at(-1)?.v ?? "").toLowerCase()
-  );
-
-  if(previousStatus[key].length){
-    const changed = current.some((s,i)=>s !== previousStatus[key][i]);
-    if(changed) playBeep();
+function detectStatusChange(key,g){
+  if(!g?.table?.rows) return false;
+  const current = g.table.rows.map(r=>{
+    const c=r.c||[];
+    const last=c[c.length-1];
+    return String(last?.f??last?.v??"");
+  });
+  const prev = statusMemory[key];
+  let changed = false;
+  if(prev.length && current.length===prev.length){
+    changed = current.some((v,i)=>v!==prev[i]);
   }
+  statusMemory[key] = current;
+  return changed;
+}
 
-  previousStatus[key] = current;
+function playBeep(){
+  const a=document.getElementById("beep");
+  if(!a) return;
+  a.currentTime=0;
+  a.play().catch(()=>{});
 }
 
 /* ================= RENDER ================= */
