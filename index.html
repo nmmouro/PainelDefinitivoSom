@@ -223,15 +223,23 @@ function renderTable(id,g){
     h+=`<tr class="${cls}">`;
 
     cells.forEach((c,i)=>{
-      if(i===cells.length-1){
-        h+=`<td class="status-icon">${
-          status.includes("concluido")||status.includes("atendido")?"✔":
-          status.includes("andamento")?"⏳":
-          status.includes("cancelado")?"✖":""
-        }</td>`;
-      }else{
-        h+=`<td>${escapeHtml(formatCell(c))}</td>`;
-      }
+      let icon = "";
+let iconClass = "status-icon";
+
+if (status.includes("concluido") || status.includes("atendido")) {
+  icon = "✔";
+  iconClass += " status-atendido-icon";
+}
+else if (status.includes("cancelado")) {
+  icon = "✖";
+  iconClass += " status-cancelado-icon";
+}
+else if (status.includes("andamento")) {
+  icon = "⏳";
+}
+
+h += `<td class="${iconClass}">${icon}</td>`;
+
     });
 
     h+="</tr>";
