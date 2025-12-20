@@ -245,7 +245,7 @@ function renderTable(id, g){
 
     cells.forEach((c,i)=>{
       if(i === cells.length-1){
-        let icon="⏳";
+        let icon="";
         if(status.includes("concluido")||status.includes("atendido")) icon="✔";
         if(status.includes("cancelado")) icon="✖";
         h+=`<td class="status-icon">${icon}</td>`;
