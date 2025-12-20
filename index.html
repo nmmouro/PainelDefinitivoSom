@@ -109,6 +109,10 @@ tr.status-concluido{background:rgba(0,200,120,0.10)}
 
 <body>
 
+  <audio id="beep" preload="auto">
+  <source src="alerta.mp3" type="audio/mpeg">
+</audio>
+
 <header>
   <img src="logo.png" onerror="this.style.display='none'">
   <div class="title">MOVIMENTAÇÃO DIÁRIA</div>
@@ -153,17 +157,32 @@ const TABLE_HEADERS = {
   social: ["Data","Período","Passageiro","Motivo","Itinerário","STATUS"]
 };
 
-/* ================= STATUS MEM ================= */
-const statusMemory = {painel: [], agenda: [], social: []};
+/* ================= ÁUDIO ================= */
+let audioUnlocked = false;
+let lastDataHash = null;
 
-/* ================= SOM ================= */
 function playBeep(){
   const a = document.getElementById("beep");
-  if(a){
-    a.currentTime = 0;
-    a.play().catch(()=>{});
-  }
+  if(!a || !audioUnlocked) return;
+  a.currentTime = 0;
+  a.play().catch(()=>{});
 }
+
+/* 🔓 desbloqueio obrigatório (1 clique) */
+document.addEventListener("click", () => {
+  const a = document.getElementById("beep");
+  if(!a || audioUnlocked) return;
+
+  a.volume = 0.6;
+
+  a.play().then(() => {
+    a.pause();
+    a.currentTime = 0;
+    audioUnlocked = true;
+    console.log("🔊 Áudio liberado");
+  }).catch(()=>{});
+}, { once:true });
+
 
 /* ================= RELÓGIO ================= */
 function updateClock(){
@@ -280,20 +299,31 @@ async function loadAll(){
       fetchSheet(TAB_SS)
     ]);
 
-    detectStatusChange("painel", p);
-    detectStatusChange("agenda", a);
-    detectStatusChange("social", s);
+   /* 🔍 verifica mudança REAL */
+    const currentHash = generateHash([
+      p.table.rows,
+      a.table.rows,
+      s.table.rows
+    ]);
+
+    if(lastDataHash && currentHash !== lastDataHash){
+      playBeep(); // 🔊 SOM SOMENTE SE HOUVER ALTERAÇÃO
+    }
+
+    lastDataHash = currentHash;
 
     renderTable("painel", p);
     renderTable("agenda", a);
     renderTable("social", s);
+
   }catch(e){
     console.error(e);
   }
 }
 
+
 loadAll();
-setInterval(loadAll, 60000);
+setInterval(loadAll, 10000);
 </script>
 
 
