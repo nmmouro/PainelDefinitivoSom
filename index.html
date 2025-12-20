@@ -150,17 +150,17 @@ const TABS = [
   { id:"social", name:"AGENDA SERVIÇO SOCIAL" }
 ];
 
-  /* ================= HEADERS ================= */
+/* ================= HEADERS ================= */
 const TABLE_HEADERS = {
   painel: ["Data","Hora","Veículo","Empregado","Passageiro/Motivo","Itinerário","STATUS"],
   agenda: ["Data","Hora","Passageiro","Setor","Motivo","Itinerário","STATUS"],
   social: ["Data","Período","Passageiro","Motivo","Itinerário","STATUS"]
 };
 
-
 /* ================= ÁUDIO ================= */
 let audioUnlocked = false;
 let lastDataHash = null;
+let firstLoad = true;
 
 function playBeep(){
   const a = document.getElementById("beep");
@@ -169,7 +169,7 @@ function playBeep(){
   a.play().catch(()=>{});
 }
 
-/* 🔓 desbloqueio obrigatório (1 clique) */
+/* 🔓 desbloqueio por clique */
 document.addEventListener("click", () => {
   const a = document.getElementById("beep");
   if(!a || audioUnlocked) return;
@@ -203,11 +203,17 @@ const escapeHtml = s =>
   }[m]));
 
 const formatCell = c =>
-  c == null ? "" : (typeof c === "object" ? (c.f ?? formatCell(c.v)) : String(c));
+  c == null ? "" : (typeof c === "object" ? (c.f ?? c.v ?? "") : String(c));
 
-/* 🔐 gera hash REAL dos dados */
-function generateHash(data){
-  return JSON.stringify(data);
+/* 🔐 hash apenas com valores reais */
+function generateCleanHash(results){
+  return JSON.stringify(
+    results.map(r =>
+      r.table.rows.map(row =>
+        (row.c || []).map(c => c?.f ?? c?.v ?? "")
+      )
+    )
+  );
 }
 
 /* ================= RENDER ================= */
@@ -218,11 +224,11 @@ function renderTable(id, g){
     return;
   }
 
-  const cols = g.table.cols.map(c=>c.label||"");
+  const headers = TABLE_HEADERS[id] || [];
   const rows = g.table.rows;
 
   let h="<table><thead><tr>";
-  cols.forEach(c=>h+=`<th>${escapeHtml(c)}</th>`);
+  headers.forEach(c=>h+=`<th>${escapeHtml(c)}</th>`);
   h+="</tr></thead><tbody>";
 
   rows.forEach(r=>{
@@ -270,15 +276,13 @@ async function loadAll(){
   try{
     const results = await Promise.all(TABS.map(t=>fetchSheet(t.name)));
 
-    /* 🔍 compara SOMENTE os dados */
-    const currentHash = generateHash(
-      results.map(r => r.table.rows)
-    );
+    const currentHash = generateCleanHash(results);
 
-    if(lastDataHash && currentHash !== lastDataHash){
-      playBeep(); // 🔊 SOM APENAS SE HOUVER ALTERAÇÃO
+    if(!firstLoad && lastDataHash && currentHash !== lastDataHash){
+      playBeep(); // 🔊 SOM SÓ SE DADOS MUDAREM
     }
 
+    firstLoad = false;
     lastDataHash = currentHash;
 
     renderTable("painel", results[0]);
@@ -293,7 +297,3 @@ async function loadAll(){
 loadAll();
 setInterval(loadAll, 10000);
 </script>
-
-
-</body>
-</html>
