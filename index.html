@@ -138,24 +138,17 @@ tr.status-concluido{background:rgba(0,200,120,0.10)}
 
 <div class="small">Atualização automática a cada 60s • Google Sheets</div>
 
-<audio id="beep">
-  <source src="alerta.mp3" type="audio/mpeg">
-</audio>
+
 
 
 <script>
 /* ================= CONFIG ================= */
 const SHEET_ID = "1Ch3AjQ0MDo4WuQWFDR3r8nZrHb4yQkSLOtT5_QgxT6E";
-const TAB_PAINEL = "PAINEL";
-const TAB_AGENDA = "AGENDA DO DIA";
-const TAB_SS = "AGENDA SERVIÇO SOCIAL";
-
-/* ================= HEADERS ================= */
-const TABLE_HEADERS = {
-  painel: ["Data","Hora","Veículo","Empregado","Passageiro/Motivo","Itinerário","STATUS"],
-  agenda: ["Data","Hora","Passageiro","Setor","Motivo","Itinerário","STATUS"],
-  social: ["Data","Período","Passageiro","Motivo","Itinerário","STATUS"]
-};
+const TABS = [
+  { id:"painel", name:"PAINEL" },
+  { id:"agenda", name:"AGENDA DO DIA" },
+  { id:"social", name:"AGENDA SERVIÇO SOCIAL" }
+];
 
 /* ================= ÁUDIO ================= */
 let audioUnlocked = false;
@@ -174,28 +167,26 @@ document.addEventListener("click", () => {
   if(!a || audioUnlocked) return;
 
   a.volume = 0.6;
-
-  a.play().then(() => {
+  a.play().then(()=>{
     a.pause();
     a.currentTime = 0;
     audioUnlocked = true;
-    console.log("🔊 Áudio liberado");
+    console.log("🔊 áudio liberado");
   }).catch(()=>{});
-}, { once:true });
-
+},{ once:true });
 
 /* ================= RELÓGIO ================= */
 function updateClock(){
   const n = new Date();
   document.getElementById("clock").innerText =
-    n.toLocaleDateString("pt-BR") + " — " +
+    n.toLocaleDateString("pt-BR")+" — "+
     n.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 }
 setInterval(updateClock,1000);
 updateClock();
 
 /* ================= HELPERS ================= */
-const parseGvizText = t =>
+const parseGviz = t =>
   JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}") + 1));
 
 const escapeHtml = s =>
@@ -203,124 +194,93 @@ const escapeHtml = s =>
     "&":"&amp;","<":"&lt;",">":"&gt;"
   }[m]));
 
-const formatCell = c => {
-  if(c == null) return "";
-  if(typeof c === "object") return c.f ?? formatCell(c.v);
-  return String(c);
-};
+const formatCell = c =>
+  c == null ? "" : (typeof c === "object" ? (c.f ?? formatCell(c.v)) : String(c));
 
-/* ================= STATUS CHANGE ================= */
-function detectStatusChange(key,g){
-  if(!g?.table?.rows) return false;
-  const current = g.table.rows.map(r=>{
-    const c=r.c||[];
-    const last=c[c.length-1];
-    return String(last?.f??last?.v??"");
-  });
-  const prev = statusMemory[key];
-  let changed = false;
-  if(prev.length && current.length===prev.length){
-    changed = current.some((v,i)=>v!==prev[i]);
-  }
-  statusMemory[key] = current;
-  return changed;
-}
-
-function playBeep(){
-  const a=document.getElementById("beep");
-  if(!a) return;
-  a.currentTime=0;
-  a.play().catch(()=>{});
+/* 🔐 gera hash REAL dos dados */
+function generateHash(data){
+  return JSON.stringify(data);
 }
 
 /* ================= RENDER ================= */
 function renderTable(id, g){
   const el = document.getElementById(id);
-  if(!g?.table?.cols){
+  if(!g?.table?.rows){
     el.innerHTML = "<div style='text-align:center;opacity:.7'>Sem dados</div>";
     return;
   }
 
-  const headers = TABLE_HEADERS[id] || [];
-  const cols = g.table.cols.map((c,i)=>c.label || headers[i] || `COL ${i+1}`);
-  const rows = g.table.rows || [];
+  const cols = g.table.cols.map(c=>c.label||"");
+  const rows = g.table.rows;
 
-  let h = "<table><thead><tr>";
-  cols.forEach(c => h += `<th>${escapeHtml(c)}</th>`);
-  h += "</tr></thead><tbody>";
+  let h="<table><thead><tr>";
+  cols.forEach(c=>h+=`<th>${escapeHtml(c)}</th>`);
+  h+="</tr></thead><tbody>";
 
   rows.forEach(r=>{
-    const cells = r.c || [];
-    const status = String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
+    const cells=r.c||[];
+    const status=String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
 
-    let cls = "";
+    let cls="";
     if(status.includes("cancelado")) cls="status-cancelado";
     else if(status.includes("concluido")) cls="status-concluido";
     else if(status.includes("andamento")) cls="status-andamento";
     else if(status.includes("atendido")) cls="status-atendido";
 
-    h += `<tr class="${cls}">`;
+    h+=`<tr class="${cls}">`;
 
     cells.forEach((c,i)=>{
-      const raw = formatCell(c);
-
-      if(i === cells.length - 1){
-        let icon = "";
-        if(status.includes("concluido") || status.includes("atendido")) icon="✔";
-        else if(status.includes("cancelado")) icon="✖";
-        else if(status.includes("andamento")) icon="⏳";
-
-        h += `<td class="status-icon">${icon}</td>`;
-      } else {
-        h += `<td>${escapeHtml(raw)}</td>`;
+      if(i === cells.length-1){
+        let icon="⏳";
+        if(status.includes("concluido")||status.includes("atendido")) icon="✔";
+        if(status.includes("cancelado")) icon="✖";
+        h+=`<td class="status-icon">${icon}</td>`;
+      }else{
+        h+=`<td>${escapeHtml(formatCell(c))}</td>`;
       }
     });
 
-    h += "</tr>";
+    h+="</tr>";
   });
 
-  h += "</tbody></table>";
-  el.innerHTML = h;
+  h+="</tbody></table>";
+  el.innerHTML=h;
 }
 
 /* ================= FETCH ================= */
 async function fetchSheet(tab){
-  const u = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(tab)}&tqx=out:json&nocache=${Date.now()}`;
-  const r = await fetch(u,{cache:"no-store"});
-  return parseGvizText(await r.text());
+  const url =
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`+
+    `?sheet=${encodeURIComponent(tab)}&tqx=out:json&nocache=${Date.now()}`;
+
+  const r = await fetch(url,{cache:"no-store"});
+  return parseGviz(await r.text());
 }
 
 /* ================= LOAD ================= */
 async function loadAll(){
   try{
-    const [p,a,s] = await Promise.all([
-      fetchSheet(TAB_PAINEL),
-      fetchSheet(TAB_AGENDA),
-      fetchSheet(TAB_SS)
-    ]);
+    const results = await Promise.all(TABS.map(t=>fetchSheet(t.name)));
 
-   /* 🔍 verifica mudança REAL */
-    const currentHash = generateHash([
-      p.table.rows,
-      a.table.rows,
-      s.table.rows
-    ]);
+    /* 🔍 compara SOMENTE os dados */
+    const currentHash = generateHash(
+      results.map(r => r.table.rows)
+    );
 
     if(lastDataHash && currentHash !== lastDataHash){
-      playBeep(); // 🔊 SOM SOMENTE SE HOUVER ALTERAÇÃO
+      playBeep(); // 🔊 SOM APENAS SE HOUVER ALTERAÇÃO
     }
 
     lastDataHash = currentHash;
 
-    renderTable("painel", p);
-    renderTable("agenda", a);
-    renderTable("social", s);
+    renderTable("painel", results[0]);
+    renderTable("agenda", results[1]);
+    renderTable("social", results[2]);
 
   }catch(e){
     console.error(e);
   }
 }
-
 
 loadAll();
 setInterval(loadAll, 10000);
