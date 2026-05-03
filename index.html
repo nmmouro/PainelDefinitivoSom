@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Painel - Frota (GViz)</title>
 
+    <button id="toggle-audio" onclick="toggleAudio()">🔊 SOM: ON</button>
+
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-  <button id="toggle-audio" onclick="toggleAudio()">🔊 SOM: ON</button>
 
 <style>
 :root{
@@ -92,6 +93,22 @@ td:last-child{
 td.status-icon{
   font-size:20px;
 }
+
+#toggle-audio{
+  background:#0b1a3a;
+  color:#fff;
+  border:1px solid #fff;
+  padding:6px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+#toggle-audio.off{
+  background:#3a0b0b;
+  color:#ff4d4d;
+}
+  
   /* ================= CORES DE STATUS ================= */
 tr.status-atendido   td.status-icon{color:#00ff9c;}
 tr.status-cancelado  td.status-icon{color:#ff4d4d;}
@@ -165,26 +182,53 @@ let audioUnlocked = false;
 let lastDataHash = null;
 let firstLoad = true;
 
-function playBeep(){
-  const a = document.getElementById("beep");
-  if(!a || !audioUnlocked) return;
-  a.currentTime = 0;
-  a.play().catch(()=>{});
+  /* 🔊 estado salvo */
+let soundEnabled = localStorage.getItem("sound") !== "off";
+
+function updateSoundButton(){
+  const btn = document.getElementById("toggle-audio");
+  if(!btn) return;
+
+  if(soundEnabled){
+    btn.innerText = "🔊 SOM: ON";
+    btn.classList.remove("off");
+  }else{
+    btn.innerText = "🔇 SOM: OFF";
+    btn.classList.add("off");
+  }
 }
 
-/* 🔓 desbloqueio por clique */
-document.addEventListener("click", () => {
+  function toggleAudio(){
+  soundEnabled = !soundEnabled;
+  localStorage.setItem("sound", soundEnabled ? "on" : "off");
+  updateSoundButton();
+}
+
+  document.addEventListener("pointerdown", unlockAudio, { once:true });
+document.addEventListener("keydown", unlockAudio, { once:true });
+
+function unlockAudio(){
   const a = document.getElementById("beep");
-  if(!a || audioUnlocked) return;
+  if(!a) return;
 
   a.volume = 0.6;
+
   a.play().then(()=>{
     a.pause();
     a.currentTime = 0;
     audioUnlocked = true;
     console.log("🔊 áudio liberado");
-  }).catch(()=>{});
-},{ once:true });
+  }).catch(err=>{
+    console.log("Erro ao liberar áudio:", err);
+  });
+}
+  function playBeep(){
+  const a = document.getElementById("beep");
+  if(!a || !audioUnlocked || !soundEnabled) return;
+
+  a.currentTime = 0;
+  a.play().catch(()=>{});
+}
 
 /* ================= RELÓGIO ================= */
 function updateClock(){
@@ -299,5 +343,6 @@ async function loadAll(){
 }
 
 loadAll();
+  updateSoundButton();
 setInterval(loadAll, 10000);
 </script>
