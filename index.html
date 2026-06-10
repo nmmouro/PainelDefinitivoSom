@@ -1,352 +1,482 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Painel - Frota (GViz)</title>
-
-
-
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
+<meta charset="utf-8">
+<title>Painel Frota</title>
 
 <style>
-:root{
-  --bg:#071029;
-  --card:#2a71e8;
-  --muted:#f7f9fa;
-  --accent:#00eaff;
-}
 
-html,body{
-  height:100%;
+body{
   margin:0;
-  background:var(--bg);
-  color:#fff;
-  font-family:Inter,Arial;
+  background:#071029;
+  color:white;
+  font-family:Arial;
 }
 
-header{
+/* LAYOUT */
+.layout{
   display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 80px;
-  background:#020617;
-  border-radius:10px;
+  height:100vh;
 }
 
-header img{height:70px}
-header .title{font-size:30px;font-weight:700;color:var(--accent)}
-header .clock{font-size:26px;color:var(--muted)}
-
-main{
-  padding:12px;
-  display:grid;
-  grid-template-rows:1fr 1fr 1fr;
-  gap:10px;
-  height:calc(100vh - 92px);
+.sidebar{
+  width:220px;
+  background:#0b1c3d;
+  padding:20px;
 }
 
-.card{
-  background:var(--card);
-  border-radius:10px;
+.sidebar h2{
+  text-align:center;
+}
+
+.sidebar button{
+  width:100%;
+  margin-bottom:10px;
   padding:12px;
+  border:none;
+  background:#1e3a8a;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+}
+
+.conteudo{
+  flex:1;
+  padding:20px;
   overflow:auto;
 }
 
-.card h2{
-  margin:0 0 8px;
-  color:var(--accent);
-  font-size:26px;
-  text-align:center;
+/* KPIs */
+.kpis{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
 }
 
+.card{
+  flex:1;
+  background:#1e2f5c;
+  padding:15px;
+  text-align:center;
+  border-radius:10px;
+}
+
+/* FORM */
+.formulario{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.formulario input, select, button{
+  height:45px;
+  border-radius:8px;
+  border:none;
+  font-size:14px;
+  padding:8px;
+}
+
+.formulario button{
+  background:#00c853;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* TABLE */
 table{
   width:100%;
   border-collapse:collapse;
-  font-size:16px;
 }
 
-th,td{
-  padding:12px 36px;
-  border-radius:10px;
-  font-weight:700;
+th{
+  background:#2c4078;
+  padding:10px;
+}
+
+td{
+  padding:8px;
   text-align:center;
-  white-space:nowrap;
-}
-
-thead th{
-  position:sticky;
-  top:0;
-  background:#0435bf;
-  z-index:2;
-}
-
-th:last-child,
-td:last-child{
-  width:50px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-td.status-icon{
-  font-size:20px;
-}
-
-#toggle-audio{
-  background:#0b1a3a;
-  color:#fff;
-  border:1px solid #fff;
-  padding:6px 12px;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:700;
-}
-
-#toggle-audio.off{
-  background:#3a0b0b;
-  color:#ff4d4d;
+  border:1px solid #1e2f5c;
 }
   
-  /* ================= CORES DE STATUS ================= */
-tr.status-atendido   td.status-icon{color:#00ff9c;}
-tr.status-cancelado  td.status-icon{color:#ff4d4d;}
-tr.status-andamento  td.status-icon{color:#ffcc00;}
-tr.status-concluido  td.status-icon{color:#7CFC00;}
- 
-tr.status-atendido{background:rgba(147,219,112,0.18)}
-tr.status-andamento{background:rgba(219,147,112,0.18)}
-tr.status-concluido{background:rgba(0,200,120,0.10)}
-
-.small{
-  text-align:center;
-  font-size:12px;
-  color:var(--muted);
+td[contenteditable="true"]{
+  cursor:text;
 }
+
+td[contenteditable="true"]:focus{
+  background:#1e3a8a;
+  outline:none;
+}
+
+tr:nth-child(even){
+  background:#0c1d40;
+}
+
+/* STATUS */
+.status{
+  padding:4px 8px;
+  border-radius:10px;
+  font-size:12px;
+}
+
+.pendente{background:#fbc02d}
+.ok{background:#00c853}
+.cancelado{background:#d32f2f}
+
 </style>
 </head>
 
 <body>
 
-  <audio id="beep" preload="auto">
-  <source src="alerta.mp3" type="audio/mpeg">
-</audio>
+<div class="layout">
 
-<header>
-  <img src="logo.png" onerror="this.style.display='none'">
-  <div class="title">MOVIMENTAÇÃO DIÁRIA</div>
-
- <!-- 🔊 BOTÃO CENTRAL -->
-  <button id="toggle-audio" onclick="toggleAudio()">🔊 SOM: ON</button>
-    
-  <div class="clock" id="clock"></div>
-</header>
+<!-- MENU --><aside class="sidebar">
+  <button onclick="mostrarTela('agenda')">📅 Agenda do Dia</button>
+  <button onclick="mostrarTela('social')">🏥 Serviço Social</button>
+</aside>
 
 <main>
-  <section class="card">
-    <h2>PAINEL</h2>
-    <div id="painel">Carregando...</div>
-  </section>
 
-  <section class="card">
-    <h2>AGENDA DO DIA</h2>
-    <div id="agenda">Carregando...</div>
-  </section>
+  <!-- AGENDA DO DIA -->
+  <div id="telaAgenda">
 
-  <section class="card">
-    <h2>AGENDA SERVIÇO SOCIAL</h2>
-    <div id="social">Carregando...</div>
-  </section>
+  <h2 style="text-align:center;">📅 AGENDA DO DIA</h2>
+
+  <div class="formulario">
+
+    <input type="date" id="dataAgenda">
+    <input type="time" id="horaAgenda">
+
+    <input type="text" id="passageiroAgenda" placeholder="Passageiro">
+    <input type="text" id="setorAgenda" placeholder="Setor">
+    <input type="text" id="motivoAgenda" placeholder="Motivo">
+    <input type="text" id="itinerarioAgenda" placeholder="Itinerário">
+
+    <button onclick="salvarAgenda()">Salvar</button>
+
+  </div>
+
+  <div id="tabelaAgenda"></div>
+
+</div>
+  <!-- SERVIÇO SOCIAL -->
+  <div id="telaSocial" style="display:none;">
+
+  <h2 style="text-align:center;">🏥 AGENDA SERVIÇO SOCIAL</h2>
+
+  <div class="formulario">
+
+    <input type="date" id="dataSocial">
+
+    <select id="periodoSocial">
+      <option value="">Selecione o período</option>
+      <option value="MANHÃ">MANHÃ</option>
+      <option value="TARDE">TARDE</option>
+    </select>
+
+    <input type="text" id="passageiroSocial" placeholder="Passageiro">
+    <input type="text" id="motivoSocial" placeholder="Motivo">
+    <input type="text" id="itinerarioSocial" placeholder="Itinerário">
+
+    <button onclick="salvarSocial()">Salvar</button>
+
+  </div>
+
+  <div id="tabelaSocial"></div>
+
+</div>
 </main>
 
-<div class="small">Atualização automática a cada 60s • Google Sheets</div>
-
-
-
+</main>
+</div>
 
 <script>
-/* ================= CONFIG ================= */
-const SHEET_ID = "1Ch3AjQ0MDo4WuQWFDR3r8nZrHb4yQkSLOtT5_QgxT6E";
-const TABS = [
-  { id:"painel", name:"PAINEL" },
-  { id:"agenda", name:"AGENDA DO DIA" },
-  { id:"social", name:"AGENDA SERVIÇO SOCIAL" }
-];
 
-/* ================= HEADERS ================= */
-const TABLE_HEADERS = {
-  painel: ["Data","Hora","Veículo","Empregado","Passageiro/Motivo","Itinerário","STATUS"],
-  agenda: ["Data","Hora","Passageiro","Setor","Motivo","Itinerário","STATUS"],
-  social: ["Data","Período","Passageiro","Motivo","Itinerário","STATUS"]
+// =========================
+// CONFIG
+// =========================
+const API_URL = "https://script.google.com/macros/s/AKfycbyKpWQl_zFL9TaP9HUBz9cbaJqeG8mE9uDyBSq_O3SFqLIdINirPkVCrVgeB8A4vjqJsQ/exec";
+
+
+// =========================
+// HELPERS
+// =========================
+const escapeHTML = str =>
+  String(str ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+
+function statusHTML(s){
+  const map = {
+    "PENDENTE":"pendente",
+    "CONCLUÍDO":"ok",
+    "CANCELADO":"cancelado"
+  };
+  return `<span class="status ${map[s]||""}">${s||""}</span>`;
+}
+
+function toast(msg){
+  console.log(msg);
+  alert(msg); // pode evoluir depois
+}
+
+// =========================
+// API LAYER
+// =========================
+const API = {
+
+  async listar(sheet){
+    const res = await fetch(`${API_URL}?agenda=${sheet}`);
+    const json = await res.json();
+    return json;
+  },
+
+  async salvar(data){
+    await fetch(API_URL,{
+      method:"POST",
+      body:data
+    });
+  }
+
 };
 
-/* ================= ÁUDIO ================= */
-let audioUnlocked = false;
-let lastDataHash = null;
-let firstLoad = true;
+// =========================
+// TABLE ENGINE
+// =========================
+function renderTabela({target, dados, colunas, sheet}){
 
-  /* 🔊 estado salvo */
-let soundEnabled = localStorage.getItem("sound") !== "off";
+  let html = `
+  <table>
+    <thead><tr>
+      ${colunas.map(c=>`<th>${c.label}</th>`).join("")}
+      <th>Ações</th>
+    </tr></thead>
+    <tbody>
+  `;
 
-function updateSoundButton(){
-  const btn = document.getElementById("toggle-audio");
-  if(!btn) return;
+  dados.forEach(v => {
 
-  if(soundEnabled){
-    btn.innerText = "🔊 SOM: ON";
-    btn.classList.remove("off");
-  }else{
-    btn.innerText = "🔇 SOM: OFF";
-    btn.classList.add("off");
-  }
-}
+    const id = v[0];
 
-  function toggleAudio(){
-  soundEnabled = !soundEnabled;
-  localStorage.setItem("sound", soundEnabled ? "on" : "off");
-  updateSoundButton();
-}
+    html += "<tr>";
 
-  document.addEventListener("pointerdown", unlockAudio, { once:true });
-document.addEventListener("keydown", unlockAudio, { once:true });
+    colunas.forEach(c => {
 
-function unlockAudio(){
-  const a = document.getElementById("beep");
-  if(!a) return;
+      let valor = v[c.index];
 
-  a.volume = 0.6;
+      if(c.render){
+        valor = c.render(valor);
+      } else {
+        valor = escapeHTML(valor);
+      }
 
-  a.play().then(()=>{
-    a.pause();
-    a.currentTime = 0;
-    audioUnlocked = true;
-    console.log("🔊 áudio liberado");
-  }).catch(err=>{
-    console.log("Erro ao liberar áudio:", err);
+      if(c.editable){
+        html += `
+        <td contenteditable="true"
+          onblur="editarCampo('${id}','${c.field}',this.innerText,'${sheet}')">
+          ${valor}
+        </td>`;
+      } else {
+        html += `<td>${valor}</td>`;
+      }
+
+    });
+
+    html += `
+      <td>
+        <button onclick="deletar('${id}','${sheet}')">🗑️</button>
+      </td>
+    `;
+
+    html += "</tr>";
+
   });
-}
-  function playBeep(){
-  const a = document.getElementById("beep");
-  if(!a || !audioUnlocked || !soundEnabled) return;
 
-  a.currentTime = 0;
-  a.play().catch(()=>{});
+  html += "</tbody></table>";
+
+  document.getElementById(target).innerHTML = html;
 }
 
-/* ================= RELÓGIO ================= */
-function updateClock(){
-  const n = new Date();
-  document.getElementById("clock").innerText =
-    n.toLocaleDateString("pt-BR")+" — "+
-    n.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
-}
-setInterval(updateClock,1000);
-updateClock();
 
-/* ================= HELPERS ================= */
-const parseGviz = t =>
-  JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}") + 1));
+// =========================
+// CONTROLLERS
+// =========================
 
-const escapeHtml = s =>
-  String(s ?? "").replace(/[&<>]/g,m=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;"
-  }[m]));
+async function carregarAgenda(){
 
-const formatCell = c =>
-  c == null ? "" : (typeof c === "object" ? (c.f ?? c.v ?? "") : String(c));
+  const res = await API.listar("AGENDA DO DIA");
 
-/* 🔐 hash apenas com valores reais */
-function generateCleanHash(results){
-  return JSON.stringify(
-    results.map(r =>
-      r.table.rows.map(row =>
-        (row.c || []).map(c => c?.f ?? c?.v ?? "")
-      )
-    )
-  );
-}
-
-/* ================= RENDER ================= */
-function renderTable(id, g){
-  const el = document.getElementById(id);
-  if(!g?.table?.rows){
-    el.innerHTML = "<div style='text-align:center;opacity:.7'>Sem dados</div>";
+  if(!res.success){
+    toast("Erro ao carregar Agenda");
     return;
   }
 
-  const headers = TABLE_HEADERS[id] || [];
-  const rows = g.table.rows;
-
-  let h="<table><thead><tr>";
-  headers.forEach(c=>h+=`<th>${escapeHtml(c)}</th>`);
-  h+="</tr></thead><tbody>";
-
-  rows.forEach(r=>{
-    const cells=r.c||[];
-    const status=String(cells.at(-1)?.f ?? cells.at(-1)?.v ?? "").toLowerCase();
-
-    let cls="";
-    if(status.includes("cancelado")) cls="status-cancelado";
-    else if(status.includes("concluido")) cls="status-concluido";
-    else if(status.includes("andamento")) cls="status-andamento";
-    else if(status.includes("atendido")) cls="status-atendido";
-
-    h+=`<tr class="${cls}">`;
-
-    cells.forEach((c,i)=>{
-      if(i === cells.length-1){
-        let icon="";
-        if(status.includes("concluido")||status.includes("atendido")) icon="✔";
-        if(status.includes("cancelado")) icon="✖";
-        else if(status.includes("andamento")) icon="⏳";
-        h+=`<td class="status-icon">${icon}</td>`;
-      }else{
-        h+=`<td>${escapeHtml(formatCell(c))}</td>`;
-      }
-    });
-
-    h+="</tr>";
+  renderTabela({
+    target:"tabelaAgenda",
+    dados:res.dados,
+    sheet:"AGENDA DO DIA",
+    colunas:[
+      {label:"Data", index:1, field:"data", editable:true},
+      {label:"Hora", index:2, field:"hora", editable:true},
+      {label:"Passageiro", index:3, field:"passageiro", editable:true},
+      {label:"Setor", index:4, field:"setor", editable:true},
+      {label:"Motivo", index:5, field:"motivo", editable:true},
+      {label:"Itinerário", index:6, field:"itinerario", editable:true},
+      {label:"Status", index:7, field:"status", render:statusHTML, editable:false}
+    ]
   });
 
-  h+="</tbody></table>";
-  el.innerHTML=h;
 }
 
-/* ================= FETCH ================= */
-async function fetchSheet(tab){
-  const url =
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`+
-    `?sheet=${encodeURIComponent(tab)}&tqx=out:json&nocache=${Date.now()}`;
 
-  const r = await fetch(url,{cache:"no-store"});
-  return parseGviz(await r.text());
-}
 
-/* ================= LOAD ================= */
-async function loadAll(){
-  try{
-    const results = await Promise.all(TABS.map(t=>fetchSheet(t.name)));
+async function carregarSocial(){
 
-    const currentHash = generateCleanHash(results);
+  const res = await API.listar("AGENDA SERVIÇO SOCIAL");
 
-    if(!firstLoad && lastDataHash && currentHash !== lastDataHash){
-      playBeep(); // 🔊 SOM SÓ SE DADOS MUDAREM
-    }
-
-    firstLoad = false;
-    lastDataHash = currentHash;
-
-    renderTable("painel", results[0]);
-    renderTable("agenda", results[1]);
-    renderTable("social", results[2]);
-
-  }catch(e){
-    console.error(e);
+  if(!res.success){
+    toast("Erro ao carregar Social");
+    return;
   }
+
+  renderTabela({
+    target:"tabelaSocial",
+    dados:res.dados,
+    sheet:"AGENDA SERVIÇO SOCIAL",
+    colunas:[
+      {label:"Data", index:1, field:"data", editable:true},
+      {label:"Período", index:2, field:"hora", editable:true},
+      {label:"Passageiro", index:3, field:"passageiro", editable:true},
+      {label:"Motivo", index:5, field:"motivo", editable:true},
+      {label:"Itinerário", index:6, field:"itinerario", editable:true},
+      {label:"Status", index:7, field:"status", render:statusHTML}
+    ]
+  });
+
 }
 
-loadAll();
-  updateSoundButton();
-setInterval(loadAll, 10000);
+
+// =========================
+// ACTIONS
+// =========================
+
+async function salvarAgenda(){
+
+  const form = new FormData();
+
+  form.append("acao","novo");
+  form.append("agenda","AGENDA DO DIA");
+
+  form.append("data", dataAgenda.value);
+  form.append("hora", horaAgenda.value);
+  form.append("passageiro", passageiroAgenda.value);
+  form.append("setor", setorAgenda.value);
+  form.append("motivo", motivoAgenda.value);
+  form.append("itinerario", itinerarioAgenda.value);
+
+  await API.salvar(form);
+
+  limparAgenda();
+  carregarAgenda();
+  toast("Salvo ✅");
+}
+
+
+async function salvarSocial(){
+
+  const form = new FormData();
+
+  form.append("acao","novo");
+  form.append("agenda","AGENDA SERVIÇO SOCIAL");
+
+  form.append("data", dataSocial.value);
+  form.append("hora", periodoSocial.value);
+
+  form.append("passageiro", passageiroSocial.value);
+  form.append("setor","");
+  form.append("motivo", motivoSocial.value);
+  form.append("itinerario", itinerarioSocial.value);
+
+  await API.salvar(form);
+
+  limparSocial();
+  carregarSocial();
+  toast("Salvo ✅");
+}
+
+
+// =========================
+// EDIT / DELETE
+// =========================
+
+async function editarCampo(id, campo, valor, agenda){
+
+  const form = new FormData();
+  form.append("acao","editar_campo");
+  form.append("id",id);
+  form.append("campo",campo);
+  form.append("valor",valor);
+  form.append("agenda",agenda);
+
+  await API.salvar(form);
+}
+
+
+async function deletar(id, agenda){
+
+  if(!confirm("Deseja excluir?")) return;
+
+  const form = new FormData();
+  form.append("acao","deletar");
+  form.append("id",id);
+  form.append("agenda",agenda);
+
+  await API.salvar(form);
+
+  carregarAgenda();
+  carregarSocial();
+
+  toast("Excluído ✅");
+}
+
+
+// =========================
+// UTILS
+// =========================
+
+function limparAgenda(){
+  ["dataAgenda","horaAgenda","passageiroAgenda","setorAgenda","motivoAgenda","itinerarioAgenda"]
+  .forEach(id=>document.getElementById(id).value="");
+}
+
+function limparSocial(){
+  ["dataSocial","periodoSocial","passageiroSocial","motivoSocial","itinerarioSocial"]
+  .forEach(id=>document.getElementById(id).value="");
+}
+
+function mostrarTela(tela){
+
+  telaAgenda.style.display = tela === "agenda" ? "block" : "none";
+  telaSocial.style.display = tela === "social" ? "block" : "none";
+}
+
+
+// =========================
+// INIT
+// =========================
+
+function init(){
+  carregarAgenda();
+  carregarSocial();
+}
+
+init();
+
 </script>
+
+</body>
+</html>
