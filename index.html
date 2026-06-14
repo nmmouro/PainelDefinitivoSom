@@ -5,121 +5,107 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Painel Frota</title>
+<title>Painel Frota SaaS</title>
 
 <style>
 
-/* ================= BASE ================= */
+/* ================= DESIGN SYSTEM ================= */
 
 :root{
-  --bg:#0b1220;
-  --card:#121a2b;
-  --card-light:#162035;
-  --border:#243150;
+  --bg:#0a0f1c;
+  --card:#12182b;
+  --card-2:#151c33;
+  --border:#1f2a46;
+
   --primary:#4f7cff;
   --success:#00e676;
   --warning:#ffb300;
   --danger:#ff5252;
   --info:#29b6f6;
-  --purple:#c084fc;
 
   --text:#ffffff;
   --muted:#9aa6c3;
 }
 
+/* ================= BASE ================= */
+
 *{margin:0;padding:0;box-sizing:border-box;}
 
 body{
   font-family:Inter,Arial,sans-serif;
-  background:linear-gradient(145deg,#0b1220,#0e1730);
+  background:radial-gradient(circle at top,#101935,#070b17);
   color:var(--text);
-  height:100vh;
-  display:flex;
-  flex-direction:column;
 }
 
 /* ================= HEADER ================= */
 
-.topbar{
+.header{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-
-  padding:12px 20px;
-  background:rgba(10,15,30,.9);
+  align-items:center;
+  padding:14px 22px;
   border-bottom:1px solid var(--border);
-  backdrop-filter:blur(12px);
-}
-
-.logo{height:45px}
-
-.center{
-  text-align:center;
+  backdrop-filter:blur(10px);
 }
 
 .title{
-  font-size:20px;
+  font-size:18px;
   font-weight:600;
-  letter-spacing:1px;
 }
 
-#clock{
-  font-size:14px;
+.clock{
+  font-size:13px;
   color:var(--muted);
-  margin-top:4px;
 }
 
-.actions{
-  display:flex;
-  gap:8px;
+/* ================= GRID ================= */
+
+.container{
+  padding:16px;
+  display:grid;
+  gap:16px;
 }
 
-button{
-  background:var(--card-light);
-  color:var(--text);
+/* ================= KPIs ================= */
+
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+}
+
+.kpi{
+  background:var(--card);
+  padding:16px;
+  border-radius:14px;
   border:1px solid var(--border);
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
+}
+
+.kpi h4{
+  color:var(--muted);
   font-size:12px;
 }
 
-button:hover{
-  background:var(--primary);
-}
-
-/* ================= MAIN ================= */
-
-main{
-  flex:1;
-  overflow:auto;
-  padding:12px;
-  display:grid;
-  gap:12px;
+.kpi .value{
+  font-size:22px;
+  font-weight:700;
+  margin-top:6px;
 }
 
 /* ================= CARDS ================= */
-
-.grid-top{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
 
 .card{
   background:var(--card);
   border-radius:14px;
   border:1px solid var(--border);
-  box-shadow:0 6px 20px rgba(0,0,0,.4);
   overflow:hidden;
 }
 
 .card header{
   padding:10px;
+  background:var(--card-2);
   text-align:center;
   font-weight:600;
-  border-bottom:1px solid var(--border);
-  background:var(--card-light);
 }
 
 /* ================= TABLE ================= */
@@ -129,72 +115,68 @@ table{
   border-collapse:collapse;
 }
 
-thead{
-  background:#1b2745;
-}
-
 th{
-  padding:8px;
   font-size:12px;
   color:var(--muted);
+  padding:8px;
 }
 
 td{
   padding:8px;
   text-align:center;
+  border-top:1px solid #202a4d;
   font-size:13px;
-  border-top:1px solid #1e2744;
 }
 
-tbody tr:hover{
-  background:#1a2540;
+tr:hover{
+  background:#182246;
 }
 
 /* ================= STATUS ================= */
 
 .badge{
-  padding:4px 8px;
+  padding:4px 10px;
   border-radius:8px;
   font-size:12px;
   font-weight:600;
 }
 
-.status-livre{background:#0f3d2e;color:var(--success);}
-.status-ocupado{background:#3d1f1f;color:var(--danger);}
-.status-manutencao{background:#1d2f4d;color:var(--info);}
-.status-viagem{background:#3a2450;color:var(--purple);}
+.livre{background:#11392c;color:var(--success);}
+.ocupado{background:#3c1d1d;color:var(--danger);}
+.viagem{background:#2c1f4f;color:#c084fc;}
+.manutencao{background:#1d2f4d;color:var(--info);}
 
-/* ================= MOBILE ================= */
+/* ================= GRID TABLES ================= */
 
-@media(max-width:768px){
-  .grid-top{
-    grid-template-columns:1fr;
-  }
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr;}
 }
 
 </style>
-
 </head>
 
 <body>
 
-<header class="topbar">
-
-  <img src="logo.png" class="logo" onerror="this.style.display='none'">
-
-  <div class="center">
-    <div class="title">MOVIMENTAÇÃO DIÁRIA</div>
-    <div id="clock"></div>
-  </div>
-
-  <div class="actions">
-    <button id="toggle-audio">🔊</button>
-    <button id="toggle-fullscreen">⛶</button>
-  </div>
-
+<header class="header">
+  <div class="title">🚀 Painel Frota SaaS</div>
+  <div id="clock" class="clock"></div>
 </header>
 
-<main id="app"></main>
+<div class="container">
+
+  <div id="kpis" class="kpis"></div>
+
+  <div class="grid" id="top"></div>
+
+  <div id="painel"></div>
+
+</div>
 
 <script>
 
@@ -211,7 +193,7 @@ const getCell = c => c?.f ?? c?.v ?? "";
 
 /* ================= FETCH ================= */
 
-async function fetchSheet(sheet, query){
+async function fetchSheet(sheet,query){
 
   const url =
     `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`+
@@ -219,53 +201,62 @@ async function fetchSheet(sheet, query){
 
   const res = await fetch(url);
   return parseGviz(await res.text());
-
 }
 
 /* ================= STATUS ================= */
 
-function statusBadge(status){
+function badge(s){
 
-  status = status.toUpperCase();
+  s = String(s).toUpperCase();
 
-  if(status.includes("MANUTEN"))
-    return `<span class="badge status-manutencao">🔧 MANUTENÇÃO</span>`;
+  if(s.includes("MANUTEN")) return `<span class="badge manutencao">🔧 MANUTENÇÃO</span>`;
+  if(s.includes("VIAGEM")) return `<span class="badge viagem">✈ VIAGEM</span>`;
+  if(s.includes("ANDAMENTO")) return `<span class="badge ocupado">⏳ OCUPADO</span>`;
 
-  if(status.includes("VIAGEM"))
-    return `<span class="badge status-viagem">✈ VIAGEM</span>`;
-
-  if(status.includes("ANDAMENTO"))
-    return `<span class="badge status-ocupado">⏳ OCUPADO</span>`;
-
-  return `<span class="badge status-livre">🟢 LIVRE</span>`;
+  return `<span class="badge livre">🟢 LIVRE</span>`;
 }
 
-/* ================= RENDER ================= */
+/* ================= TABLE ================= */
 
-function createTable(headers, rows){
+function table(headers,rows){
 
   return `
     <table>
-      <thead>
-        <tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr>
-      </thead>
+      <thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
       <tbody>
         ${rows.map(r=>{
-          const v = (r.c||[]).map(getCell);
-
-          return `
-            <tr>
-              ${v.map((c,i)=>{
-                if(i === v.length - 1){
-                  return `<td>${statusBadge(c)}</td>`;
-                }
-                return `<td>${c}</td>`;
-              }).join("")}
-            </tr>
-          `;
+          const v=(r.c||[]).map(getCell);
+          return `<tr>${v.map((c,i)=>`
+            <td>${i === v.length-1 ? badge(c) : c}</td>
+          `).join("")}</tr>`;
         }).join("")}
       </tbody>
     </table>
+  `;
+}
+
+/* ================= KPIs ================= */
+
+function renderKPIs(painel){
+
+  let livre=0,ocupado=0,manut=0,viagem=0;
+
+  painel.forEach(r=>{
+    const s = ((r.c||[]).map(getCell)[6]||"").toUpperCase();
+
+    if(s.includes("MANUTEN")) manut++;
+    else if(s.includes("VIAGEM")) viagem++;
+    else if(s.includes("ANDAMENTO")) ocupado++;
+    else livre++;
+  });
+
+  const el = document.getElementById("kpis");
+
+  el.innerHTML = `
+    <div class="kpi"><h4>Livres</h4><div class="value">${livre}</div></div>
+    <div class="kpi"><h4>Ocupados</h4><div class="value">${ocupado}</div></div>
+    <div class="kpi"><h4>Viagem</h4><div class="value">${viagem}</div></div>
+    <div class="kpi"><h4>Manutenção</h4><div class="value">${manut}</div></div>
   `;
 }
 
@@ -273,63 +264,43 @@ function createTable(headers, rows){
 
 async function load(){
 
-  const app = document.getElementById("app");
-
-  const [painel,agenda,veiculos,motoristas] = await Promise.all([
+  const [painel,veiculos,motoristas] = await Promise.all([
     fetchSheet("LANÇAMENTOS","select B,C,D,E,F,G,X"),
-    fetchSheet("AGENDA DO DIA","select B,C,D,E,F,G,H"),
     fetchSheet("VEÍCULOS","select B,V,M,N"),
     fetchSheet("MOTORISTAS","select A,B,C")
   ]);
 
-  app.innerHTML = `
+  const painelRows = painel.table.rows || [];
 
-    <div class="grid-top">
+  renderKPIs(painelRows);
 
-      <section class="card">
-        <header>VEÍCULOS</header>
-        ${createTable(["Placa","Status","Km","Comb."],veiculos.table.rows)}
-      </section>
+  document.getElementById("top").innerHTML = `
 
-      <section class="card">
-        <header>MOTORISTAS</header>
-        ${createTable(["Nome","Status","Condição"],motoristas.table.rows)}
-      </section>
-
+    <div class="card">
+      <header>VEÍCULOS</header>
+      ${table(["Placa","Status","Km","Comb."],veiculos.table.rows)}
     </div>
 
-    <section class="card">
-      <header>PAINEL</header>
-      ${createTable(["Data","Hora","Empregado","Veículo","Descrição","Destino","Status"],painel.table.rows)}
-    </section>
-
-    <section class="card">
-      <header>AGENDA</header>
-      ${createTable(["Data","Hora","Passageiro","Setor","Motivo","Destino","Status"],agenda.table.rows)}
-    </section>
-
+    <div class="card">
+      <header>MOTORISTAS</header>
+      ${table(["Nome","Status","Condição"],motoristas.table.rows)}
+    </div>
   `;
 
+  document.getElementById("painel").innerHTML = `
+    <div class="card">
+      <header>PAINEL OPERACIONAL</header>
+      ${table(["Data","Hora","Empregado","Veículo","Descrição","Destino","Status"],painelRows)}
+    </div>
+  `;
 }
 
 /* ================= CLOCK ================= */
 
-function updateClock(){
+setInterval(()=>{
   document.getElementById("clock").innerText =
     new Date().toLocaleString("pt-BR");
-}
-
-setInterval(updateClock,1000);
-updateClock();
-
-/* ================= FULLSCREEN ================= */
-
-document.getElementById("toggle-fullscreen").onclick = ()=>{
-  if(!document.fullscreenElement)
-    document.documentElement.requestFullscreen();
-  else
-    document.exitFullscreen();
-};
+},1000);
 
 /* ================= INIT ================= */
 
