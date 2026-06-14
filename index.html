@@ -209,15 +209,22 @@ async function fetchSheet(sheet,query){
 
 /* ================= STATUS ================= */
 
-function badge(s){
-
+function badge(s) {
   s = String(s).toUpperCase();
 
-  if(s.includes("MANUTEN")) return `<span class="badge manutencao">🔧 MANUTENÇÃO</span>`;
-  if(s.includes("VIAGEM")) return `<span class="badge viagem">✈ VIAGEM</span>`;
-  if(s.includes("ANDAMENTO")) return `<span class="badge ocupado">⏳ OCUPADO</span>`;
+  if (s.includes("MANUTEN")) {
+    return `<span class="badge manutencao">🔧 MANUTENÇÃO</span>`;
+  }
 
-  return `<span class=="badge livre">🟢 LIVRE</span>`;
+  if (s.includes("VIAGEM")) {
+    return `<span class="badge viagem">✈ VIAGEM</span>`;
+  }
+
+  if (s.includes("ANDAMENTO")) {
+    return `<span class="badge ocupado">⏳ OCUPADO</span>`;
+  }
+
+  return ""; // não retorna nada se não for um dos três
 }
 
 /* ================= TABLE ================= */
