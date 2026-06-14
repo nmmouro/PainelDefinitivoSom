@@ -1,187 +1,3 @@
-<!doctype html>
-<html lang="pt-BR">
-
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Painel Frota SaaS</title>
-
-<style>
-
-/* ================= DESIGN SYSTEM ================= */
-
-:root{
-  --bg:#0a0f1c;
-  --card:#12182b;
-  --card-2:#151c33;
-  --border:#1f2a46;
-
-  --primary:#4f7cff;
-  --success:#00e676;
-  --warning:#ffb300;
-  --danger:#ff5252;
-  --info:#29b6f6;
-
-  --text:#ffffff;
-  --muted:#9aa6c3;
-}
-
-/* ================= BASE ================= */
-
-*{margin:0;padding:0;box-sizing:border-box;}
-
-body{
-  font-family:Inter,Arial,sans-serif;
-  background:radial-gradient(circle at top,#101935,#070b17);
-  color:var(--text);
-}
-
-/* ================= HEADER ================= */
-
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 22px;
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(10px);
-}
-
-.title{
-  font-size:18px;
-  font-weight:600;
-}
-
-.clock{
-  font-size:13px;
-  color:var(--muted);
-}
-
-/* ================= GRID ================= */
-
-.container{
-  padding:16px;
-  display:grid;
-  gap:16px;
-}
-
-/* ================= KPIs ================= */
-
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:12px;
-}
-
-.kpi{
-  background:var(--card);
-  padding:16px;
-  border-radius:14px;
-  border:1px solid var(--border);
-}
-
-.kpi h4{
-  color:var(--muted);
-  font-size:12px;
-}
-
-.kpi .value{
-  font-size:22px;
-  font-weight:700;
-  margin-top:6px;
-}
-
-/* ================= CARDS ================= */
-
-.card{
-  background:var(--card);
-  border-radius:14px;
-  border:1px solid var(--border);
-  overflow:hidden;
-}
-
-.card header{
-  padding:10px;
-  background:var(--card-2);
-  text-align:center;
-  font-weight:600;
-}
-
-/* ================= TABLE ================= */
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th{
-  font-size:12px;
-  color:var(--muted);
-  padding:8px;
-}
-
-td{
-  padding:8px;
-  text-align:center;
-  border-top:1px solid #202a4d;
-  font-size:13px;
-}
-
-tr:hover{
-  background:#182246;
-}
-
-/* ================= STATUS ================= */
-
-.badge{
-  padding:4px 10px;
-  border-radius:8px;
-  font-size:12px;
-  font-weight:600;
-}
-
-.livre{background:#11392c;color:var(--success);}
-.ocupado{background:#3c1d1d;color:var(--danger);}
-.viagem{background:#2c1f4f;color:#c084fc;}
-.manutencao{background:#1d2f4d;color:var(--info);}
-
-/* ================= GRID TABLES ================= */
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
-
-@media(max-width:900px){
-  .grid{grid-template-columns:1fr;}
-}
-
-</style>
-</head>
-
-<body>
-
-<header class="header">
-  <div class="title">🚀 Painel Frota SaaS</div>
-  <div id="clock" class="clock"></div>
-</header>
-
-<div class="container">
-
-  <div id="kpis" class="kpis"></div>
-
-  <div class="grid" id="top"></div>
-
-  <div id="painel"></div>
-
-  <div id="agenda"></div>
-
-  <div id="agendass"></div>
-
-</div>
-
 <script>
 
 /* ================= CONFIG ================= */
@@ -209,7 +25,7 @@ async function fetchSheet(sheet,query){
 
 /* ================= STATUS ================= */
 
-function isStatusValido(s) {
+function isStatusValido(s){
   s = String(s).toUpperCase();
 
   return (
@@ -230,8 +46,35 @@ function badge(s){
   return "";
 }
 
+/* ================= OCUPAÇÃO ================= */
 
-/* ================= TABLE ================= */
+function getPlacasOcupadas(painelRows){
+  const set = new Set();
+
+  painelRows.forEach(r=>{
+    const v = (r.c || []).map(getCell);
+    const placa = String(v[3] || "").toUpperCase().trim();
+
+    if(placa) set.add(placa);
+  });
+
+  return set;
+}
+
+function getMotoristasOcupados(painelRows){
+  const set = new Set();
+
+  painelRows.forEach(r=>{
+    const v = (r.c || []).map(getCell);
+    const nome = String(v[2] || "").toUpperCase().trim();
+
+    if(nome) set.add(nome);
+  });
+
+  return set;
+}
+
+/* ================= TABLE PADRÃO ================= */
 
 function table(headers,rows){
 
@@ -255,7 +98,9 @@ function table(headers,rows){
   `;
 }
 
-  function tableVeiculos(headers, rows, placasOcupadas){
+/* ================= VEÍCULOS ================= */
+
+function tableVeiculos(headers, rows, placasOcupadas){
 
   return `
     <table>
@@ -266,19 +111,18 @@ function table(headers,rows){
         ${rows.map(r=>{
           const v = (r.c || []).map(getCell);
 
-          const placaOriginal = String(v[0] || "");
-          const placaNormalizada = placaOriginal.toUpperCase().trim();
+          const placa = String(v[0] || "");
+          const placaNorm = placa.toUpperCase().trim();
 
           let status = String(v[1] || "");
 
-          // ✅ REGRA DE NEGÓCIO
-          if (placasOcupadas.has(placaNormalizada)) {
-            status = "OCUPADO"; // <- FORÇA ESCRITA
+          if (placasOcupadas.has(placaNorm)) {
+            status = "OCUPADO";
           }
 
           return `<tr>
-            <td>${placaOriginal}</td>
-            <td>${status}</td> <!-- 🔥 escreve OCUPADO direto -->
+            <td>${placa}</td>
+            <td>${status}</td>
             <td>${v[2]}</td>
             <td>${v[3]}</td>
           </tr>`;
@@ -288,6 +132,38 @@ function table(headers,rows){
   `;
 }
 
+/* ================= MOTORISTAS ================= */
+
+function tableMotoristas(headers, rows, motoristasOcupados){
+
+  return `
+    <table>
+      <thead>
+        <tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr>
+      </thead>
+      <tbody>
+        ${rows.map(r=>{
+          const v = (r.c || []).map(getCell);
+
+          const nome = String(v[0] || "");
+          const nomeNorm = nome.toUpperCase().trim();
+
+          let status = String(v[1] || "");
+
+          if (motoristasOcupados.has(nomeNorm)) {
+            status = "OCUPADO";
+          }
+
+          return `<tr>
+            <td>${nome}</td>
+            <td>${status}</td>
+            <td>${v[2]}</td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>
+  `;
+}
 
 /* ================= KPIs ================= */
 
@@ -300,13 +176,11 @@ function renderKPIs(painel){
 
     if(s.includes("MANUTEN")) manut++;
     else if(s.includes("VIAGEM")) viagem++;
-    else if(s.includes("ANDAMENTO")) ocupado++;
+    else if(s.includes("OCUPADO")) ocupado++;
     else livre++;
   });
 
-  const el = document.getElementById("kpis");
-
-  el.innerHTML = `
+  document.getElementById("kpis").innerHTML = `
     <div class="kpi"><h4>Livres</h4><div class="value">${livre}</div></div>
     <div class="kpi"><h4>Ocupados</h4><div class="value">${ocupado}</div></div>
     <div class="kpi"><h4>Viagem</h4><div class="value">${viagem}</div></div>
@@ -318,8 +192,9 @@ function renderKPIs(painel){
 
 async function load(){
 
-  const [painel,veiculos,motoristas,agenda, agendass] = await Promise.all([
-   fetchSheet(
+  const [painel,veiculos,motoristas,agenda,agendass] = await Promise.all([
+
+    fetchSheet(
       "LANÇAMENTOS",
       "select B,C,D,E,F,G,X " +
       "where X contains 'MANUTEN' " +
@@ -327,55 +202,52 @@ async function load(){
       "or X contains 'ANDAMENTO'"
     ),
 
-    
     fetchSheet("VEÍCULOS","select B,V,M,N"),
     fetchSheet("MOTORISTAS","select A,B,C"),
     fetchSheet("AGENDA DO DIA","select B,C,D,E,F,G,H"),
     fetchSheet("AGENDA SERVIÇO SOCIAL","select B,C,D,F,G,H")
   ]);
 
-  const painelRows = (painel.table.rows || []).filter(r => {
+  const painelRows = (painel.table.rows || []).filter(r=>{
     const v = (r.c || []).map(getCell);
     return isStatusValido(v[6]);
   });
 
   const placasOcupadas = getPlacasOcupadas(painelRows);
-  
+  const motoristasOcupados = getMotoristasOcupados(painelRows);
 
- 
   renderKPIs(painelRows);
 
   document.getElementById("top").innerHTML = `
-
     <div class="card">
       <header>VEÍCULOS</header>
-      ${table(["Placa","Status","Km","Comb."],veiculos.table.rows, placasOcupadas)}
+      ${tableVeiculos(["Placa","Status","Km","Comb."],veiculos.table.rows,placasOcupadas)}
     </div>
 
     <div class="card">
       <header>MOTORISTAS</header>
-      ${table(["Nome","Status","Condição"],motoristas.table.rows)}
+      ${tableMotoristas(["Nome","Status","Condição"],motoristas.table.rows,motoristasOcupados)}
     </div>
   `;
 
   document.getElementById("painel").innerHTML = `
     <div class="card">
       <header>PAINEL OPERACIONAL</header>
-      ${table(["Data","Hora","Empregado","Veículo","Passageiro/ Setor/ Motivo","Itineráio","Status"],painelRows)}
+      ${table(["Data","Hora","Empregado","Veículo","Passageiro/Setor/Motivo","Itinerário","Status"],painelRows)}
     </div>
   `;
 
   document.getElementById("agenda").innerHTML = `
     <div class="card">
       <header>AGENDA DO DIA</header>
-      ${table(["Data","Hora","Passageiro","Setor","Motivo","Itinerário","Status"],agendarows)}
+      ${table(["Data","Hora","Passageiro","Setor","Motivo","Itinerário","Status"],agenda.table.rows)}
     </div>
   `;
 
   document.getElementById("agendass").innerHTML = `
     <div class="card">
       <header>AGENDA SERVIÇO SOCIAL</header>
-      ${table(["Data","Período","Passageiro","Motivo","Itinerário","Status"],agendassrows)}
+      ${table(["Data","Período","Passageiro","Motivo","Itinerário","Status"],agendass.table.rows)}
     </div>
   `;
 }
@@ -393,6 +265,3 @@ load();
 setInterval(load,30000);
 
 </script>
-
-</body>
-</html>
