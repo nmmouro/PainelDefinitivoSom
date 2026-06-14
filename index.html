@@ -209,6 +209,15 @@ async function fetchSheet(sheet,query){
 
 /* ================= STATUS ================= */
 
+function isStatusValido(s) {
+  s = String(s).toUpperCase();
+
+  return (
+    s.includes("MANUTEN") ||
+    s.includes("VIAGEM") ||
+    s.includes("ANDAMENTO")
+  );
+}
 
 function badge(s){
 
