@@ -227,29 +227,13 @@ function badge(s){
   if(s.includes("VIAGEM")) return `<span class="badge viagem">✈ VIAGEM</span>`;
   if(s.includes("OCUPADO")) return `<span class="badge ocupado">⏳ OCUPADO</span>`;
 
-  return `<span class="badge livre">🟢 LIVRE</span>`;
+  return "";
 }
-
-  /* ================= VEÍCULO OCUPADO ================= */
-
-function getPlacasOcupadas(painelRows){
-  const placas = new Set();
-
-  painelRows.forEach(r=>{
-    const v = (r.c || []).map(getCell);
-    const placa = String(v[3] || "").toUpperCase().trim();
-
-    if(placa) placas.add(placa);
-  });
-
-  return placas;
-}
-
 
 
 /* ================= TABLE ================= */
 
-function tableVeiculos(headers, rows, placasOcupadas){
+function table(headers,rows){
 
   return `
     <table>
@@ -258,27 +242,19 @@ function tableVeiculos(headers, rows, placasOcupadas){
       </thead>
       <tbody>
         ${rows.map(r=>{
-          const v = (r.c || []).map(getCell);
-
-          const placa = String(v[0] || "").toUpperCase().trim();
-          let status = String(v[1] || "");
-
-          // 🔥 REGRA: veículo presente no painel = OCUPADO
-          if (placasOcupadas.has(placa)) {
-            status = "OCUPADO";
-          }
+          const v=(r.c||[]).map(getCell);
 
           return `<tr>
-            <td>${v[0]}</td>
-            <td>${badge(status)}</td>
-            <td>${v[2]}</td>
-            <td>${v[3]}</td>
+            ${v.map((c,i)=>`
+              <td>${i === v.length-1 ? badge(c) : c}</td>
+            `).join("")}
           </tr>`;
         }).join("")}
       </tbody>
     </table>
   `;
 }
+
 
 /* ================= KPIs ================= */
 
@@ -330,7 +306,7 @@ async function load(){
     return isStatusValido(v[6]);
   });
   
-  const placasOcupadas = getPlacasOcupadas(painelRows);
+  
 
  
   renderKPIs(painelRows);
@@ -339,7 +315,7 @@ async function load(){
 
     <div class="card">
       <header>VEÍCULOS</header>
-      ${table(["Placa","Status","Km","Comb."],veiculos.table.rows, placasOcupadas)}
+      ${table(["Placa","Status","Km","Comb."],veiculos.table.rows)}
     </div>
 
     <div class="card">
