@@ -3,478 +3,338 @@
 
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>Painel Frota</title>
 
 <style>
 
+/* ================= BASE ================= */
+
+:root{
+  --bg:#0b1220;
+  --card:#121a2b;
+  --card-light:#162035;
+  --border:#243150;
+  --primary:#4f7cff;
+  --success:#00e676;
+  --warning:#ffb300;
+  --danger:#ff5252;
+  --info:#29b6f6;
+  --purple:#c084fc;
+
+  --text:#ffffff;
+  --muted:#9aa6c3;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
 body{
-  margin:0;
-  background:#071029;
-  color:white;
-  font-family:Arial;
-}
-
-/* LAYOUT */
-.layout{
-  display:flex;
+  font-family:Inter,Arial,sans-serif;
+  background:linear-gradient(145deg,#0b1220,#0e1730);
+  color:var(--text);
   height:100vh;
+  display:flex;
+  flex-direction:column;
 }
 
-.sidebar{
-  width:220px;
-  background:#0b1c3d;
-  padding:20px;
+/* ================= HEADER ================= */
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:12px 20px;
+  background:rgba(10,15,30,.9);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
 }
 
-.sidebar h2{
+.logo{height:45px}
+
+.center{
   text-align:center;
 }
 
-.sidebar button{
-  width:100%;
-  margin-bottom:10px;
-  padding:12px;
-  border:none;
-  background:#1e3a8a;
-  border-radius:8px;
-  color:white;
-  cursor:pointer;
+.title{
+  font-size:20px;
+  font-weight:600;
+  letter-spacing:1px;
 }
 
-.conteudo{
-  flex:1;
-  padding:20px;
-  overflow:auto;
+#clock{
+  font-size:14px;
+  color:var(--muted);
+  margin-top:4px;
 }
 
-/* KPIs */
-.kpis{
+.actions{
   display:flex;
-  gap:10px;
-  margin-bottom:20px;
+  gap:8px;
+}
+
+button{
+  background:var(--card-light);
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:12px;
+}
+
+button:hover{
+  background:var(--primary);
+}
+
+/* ================= MAIN ================= */
+
+main{
+  flex:1;
+  overflow:auto;
+  padding:12px;
+  display:grid;
+  gap:12px;
+}
+
+/* ================= CARDS ================= */
+
+.grid-top{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
 }
 
 .card{
-  flex:1;
-  background:#1e2f5c;
-  padding:15px;
+  background:var(--card);
+  border-radius:14px;
+  border:1px solid var(--border);
+  box-shadow:0 6px 20px rgba(0,0,0,.4);
+  overflow:hidden;
+}
+
+.card header{
+  padding:10px;
   text-align:center;
-  border-radius:10px;
+  font-weight:600;
+  border-bottom:1px solid var(--border);
+  background:var(--card-light);
 }
 
-/* FORM */
-.formulario{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-bottom:20px;
-}
+/* ================= TABLE ================= */
 
-.formulario input, select, button{
-  height:45px;
-  border-radius:8px;
-  border:none;
-  font-size:14px;
-  padding:8px;
-}
-
-.formulario button{
-  background:#00c853;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-/* TABLE */
 table{
   width:100%;
   border-collapse:collapse;
 }
 
+thead{
+  background:#1b2745;
+}
+
 th{
-  background:#2c4078;
-  padding:10px;
+  padding:8px;
+  font-size:12px;
+  color:var(--muted);
 }
 
 td{
   padding:8px;
   text-align:center;
-  border:1px solid #1e2f5c;
-}
-  
-td[contenteditable="true"]{
-  cursor:text;
+  font-size:13px;
+  border-top:1px solid #1e2744;
 }
 
-td[contenteditable="true"]:focus{
-  background:#1e3a8a;
-  outline:none;
+tbody tr:hover{
+  background:#1a2540;
 }
 
-tr:nth-child(even){
-  background:#0c1d40;
-}
+/* ================= STATUS ================= */
 
-/* STATUS */
-.status{
+.badge{
   padding:4px 8px;
-  border-radius:10px;
+  border-radius:8px;
   font-size:12px;
+  font-weight:600;
 }
 
-.pendente{background:#fbc02d}
-.ok{background:#00c853}
-.cancelado{background:#d32f2f}
+.status-livre{background:#0f3d2e;color:var(--success);}
+.status-ocupado{background:#3d1f1f;color:var(--danger);}
+.status-manutencao{background:#1d2f4d;color:var(--info);}
+.status-viagem{background:#3a2450;color:var(--purple);}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+  .grid-top{
+    grid-template-columns:1fr;
+  }
+}
 
 </style>
+
 </head>
 
 <body>
 
-<div class="layout">
+<header class="topbar">
 
-<!-- MENU --><aside class="sidebar">
-  <button onclick="mostrarTela('agenda')">📅 Agenda do Dia</button>
-  <button onclick="mostrarTela('social')">🏥 Serviço Social</button>
-</aside>
+  <img src="logo.png" class="logo" onerror="this.style.display='none'">
 
-<main>
-
-  <!-- AGENDA DO DIA -->
-  <div id="telaAgenda">
-
-  <h2 style="text-align:center;">📅 AGENDA DO DIA</h2>
-
-  <div class="formulario">
-
-    <input type="date" id="dataAgenda">
-    <input type="time" id="horaAgenda">
-
-    <input type="text" id="passageiroAgenda" placeholder="Passageiro">
-    <input type="text" id="setorAgenda" placeholder="Setor">
-    <input type="text" id="motivoAgenda" placeholder="Motivo">
-    <input type="text" id="itinerarioAgenda" placeholder="Itinerário">
-
-    <button onclick="salvarAgenda()">Salvar</button>
-
+  <div class="center">
+    <div class="title">MOVIMENTAÇÃO DIÁRIA</div>
+    <div id="clock"></div>
   </div>
 
-  <div id="tabelaAgenda"></div>
-
-</div>
-  <!-- SERVIÇO SOCIAL -->
-  <div id="telaSocial" style="display:none;">
-
-  <h2 style="text-align:center;">🏥 AGENDA SERVIÇO SOCIAL</h2>
-
-  <div class="formulario">
-
-    <input type="date" id="dataSocial">
-
-    <select id="periodoSocial">
-      <option value="">Selecione o período</option>
-      <option value="MANHÃ">MANHÃ</option>
-      <option value="TARDE">TARDE</option>
-    </select>
-
-    <input type="text" id="passageiroSocial" placeholder="Passageiro">
-    <input type="text" id="motivoSocial" placeholder="Motivo">
-    <input type="text" id="itinerarioSocial" placeholder="Itinerário">
-
-    <button onclick="salvarSocial()">Salvar</button>
-
+  <div class="actions">
+    <button id="toggle-audio">🔊</button>
+    <button id="toggle-fullscreen">⛶</button>
   </div>
 
-  <div id="tabelaSocial"></div>
+</header>
 
-</div>
-</main>
-
-</main>
-</div>
+<main id="app"></main>
 
 <script>
 
-// =========================
-// CONFIG
-// =========================
-const API_URL = "https://script.google.com/macros/s/AKfycbyKpWQl_zFL9TaP9HUBz9cbaJqeG8mE9uDyBSq_O3SFqLIdINirPkVCrVgeB8A4vjqJsQ/exec";
+/* ================= CONFIG ================= */
 
+const SHEET_ID = "14T7zF0likp8YGeycOYBcOs9INY9gvMzpt7SMfghE8P4";
 
-// =========================
-// HELPERS
-// =========================
-const escapeHTML = str =>
-  String(str ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
+/* ================= HELPERS ================= */
 
-function statusHTML(s){
-  const map = {
-    "PENDENTE":"pendente",
-    "CONCLUÍDO":"ok",
-    "CANCELADO":"cancelado"
-  };
-  return `<span class="status ${map[s]||""}">${s||""}</span>`;
+const parseGviz = txt =>
+  JSON.parse(txt.substring(txt.indexOf("{"), txt.lastIndexOf("}")+1));
+
+const getCell = c => c?.f ?? c?.v ?? "";
+
+/* ================= FETCH ================= */
+
+async function fetchSheet(sheet, query){
+
+  const url =
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`+
+    `?sheet=${sheet}&tq=${encodeURIComponent(query)}&tqx=out:json`;
+
+  const res = await fetch(url);
+  return parseGviz(await res.text());
+
 }
 
-function toast(msg){
-  console.log(msg);
-  alert(msg); // pode evoluir depois
+/* ================= STATUS ================= */
+
+function statusBadge(status){
+
+  status = status.toUpperCase();
+
+  if(status.includes("MANUTEN"))
+    return `<span class="badge status-manutencao">🔧 MANUTENÇÃO</span>`;
+
+  if(status.includes("VIAGEM"))
+    return `<span class="badge status-viagem">✈ VIAGEM</span>`;
+
+  if(status.includes("ANDAMENTO"))
+    return `<span class="badge status-ocupado">⏳ OCUPADO</span>`;
+
+  return `<span class="badge status-livre">🟢 LIVRE</span>`;
 }
 
-// =========================
-// API LAYER
-// =========================
-const API = {
+/* ================= RENDER ================= */
 
-  async listar(sheet){
-    const res = await fetch(`${API_URL}?agenda=${sheet}`);
-    const json = await res.json();
-    return json;
-  },
+function createTable(headers, rows){
 
-  async salvar(data){
-    await fetch(API_URL,{
-      method:"POST",
-      body:data
-    });
-  }
+  return `
+    <table>
+      <thead>
+        <tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr>
+      </thead>
+      <tbody>
+        ${rows.map(r=>{
+          const v = (r.c||[]).map(getCell);
 
-};
+          return `
+            <tr>
+              ${v.map((c,i)=>{
+                if(i === v.length - 1){
+                  return `<td>${statusBadge(c)}</td>`;
+                }
+                return `<td>${c}</td>`;
+              }).join("")}
+            </tr>
+          `;
+        }).join("")}
+      </tbody>
+    </table>
+  `;
+}
 
-// =========================
-// TABLE ENGINE
-// =========================
-function renderTabela({target, dados, colunas, sheet}){
+/* ================= LOAD ================= */
 
-  let html = `
-  <table>
-    <thead><tr>
-      ${colunas.map(c=>`<th>${c.label}</th>`).join("")}
-      <th>Ações</th>
-    </tr></thead>
-    <tbody>
+async function load(){
+
+  const app = document.getElementById("app");
+
+  const [painel,agenda,veiculos,motoristas] = await Promise.all([
+    fetchSheet("LANÇAMENTOS","select B,C,D,E,F,G,X"),
+    fetchSheet("AGENDA DO DIA","select B,C,D,E,F,G,H"),
+    fetchSheet("VEÍCULOS","select B,V,M,N"),
+    fetchSheet("MOTORISTAS","select A,B,C")
+  ]);
+
+  app.innerHTML = `
+
+    <div class="grid-top">
+
+      <section class="card">
+        <header>VEÍCULOS</header>
+        ${createTable(["Placa","Status","Km","Comb."],veiculos.table.rows)}
+      </section>
+
+      <section class="card">
+        <header>MOTORISTAS</header>
+        ${createTable(["Nome","Status","Condição"],motoristas.table.rows)}
+      </section>
+
+    </div>
+
+    <section class="card">
+      <header>PAINEL</header>
+      ${createTable(["Data","Hora","Empregado","Veículo","Descrição","Destino","Status"],painel.table.rows)}
+    </section>
+
+    <section class="card">
+      <header>AGENDA</header>
+      ${createTable(["Data","Hora","Passageiro","Setor","Motivo","Destino","Status"],agenda.table.rows)}
+    </section>
+
   `;
 
-  dados.forEach(v => {
-
-    const id = v[0];
-
-    html += "<tr>";
-
-    colunas.forEach(c => {
-
-      let valor = v[c.index];
-
-      if(c.render){
-        valor = c.render(valor);
-      } else {
-        valor = escapeHTML(valor);
-      }
-
-      if(c.editable){
-        html += `
-        <td contenteditable="true"
-          onblur="editarCampo('${id}','${c.field}',this.innerText,'${sheet}')">
-          ${valor}
-        </td>`;
-      } else {
-        html += `<td>${valor}</td>`;
-      }
-
-    });
-
-    html += `
-      <td>
-        <button onclick="deletar('${id}','${sheet}')">🗑️</button>
-      </td>
-    `;
-
-    html += "</tr>";
-
-  });
-
-  html += "</tbody></table>";
-
-  document.getElementById(target).innerHTML = html;
 }
 
+/* ================= CLOCK ================= */
 
-// =========================
-// CONTROLLERS
-// =========================
-
-async function carregarAgenda(){
-
-  const res = await API.listar("AGENDA DO DIA");
-
-  if(!res.success){
-    toast("Erro ao carregar Agenda");
-    return;
-  }
-
-  renderTabela({
-    target:"tabelaAgenda",
-    dados:res.dados,
-    sheet:"AGENDA DO DIA",
-    colunas:[
-      {label:"Data", index:1, field:"data", editable:true},
-      {label:"Hora", index:2, field:"hora", editable:true},
-      {label:"Passageiro", index:3, field:"passageiro", editable:true},
-      {label:"Setor", index:4, field:"setor", editable:true},
-      {label:"Motivo", index:5, field:"motivo", editable:true},
-      {label:"Itinerário", index:6, field:"itinerario", editable:true},
-      {label:"Status", index:7, field:"status", render:statusHTML, editable:false}
-    ]
-  });
-
+function updateClock(){
+  document.getElementById("clock").innerText =
+    new Date().toLocaleString("pt-BR");
 }
 
+setInterval(updateClock,1000);
+updateClock();
 
+/* ================= FULLSCREEN ================= */
 
-async function carregarSocial(){
+document.getElementById("toggle-fullscreen").onclick = ()=>{
+  if(!document.fullscreenElement)
+    document.documentElement.requestFullscreen();
+  else
+    document.exitFullscreen();
+};
 
-  const res = await API.listar("AGENDA SERVIÇO SOCIAL");
+/* ================= INIT ================= */
 
-  if(!res.success){
-    toast("Erro ao carregar Social");
-    return;
-  }
-
-  renderTabela({
-    target:"tabelaSocial",
-    dados:res.dados,
-    sheet:"AGENDA SERVIÇO SOCIAL",
-    colunas:[
-      {label:"Data", index:1, field:"data", editable:true},
-      {label:"Período", index:2, field:"hora", editable:true},
-      {label:"Passageiro", index:3, field:"passageiro", editable:true},
-      {label:"Motivo", index:5, field:"motivo", editable:true},
-      {label:"Itinerário", index:6, field:"itinerario", editable:true},
-      {label:"Status", index:7, field:"status", render:statusHTML}
-    ]
-  });
-
-}
-
-
-// =========================
-// ACTIONS
-// =========================
-
-async function salvarAgenda(){
-
-  const form = new FormData();
-
-  form.append("acao","novo");
-  form.append("agenda","AGENDA DO DIA");
-
-  form.append("data", dataAgenda.value);
-  form.append("hora", horaAgenda.value);
-  form.append("passageiro", passageiroAgenda.value);
-  form.append("setor", setorAgenda.value);
-  form.append("motivo", motivoAgenda.value);
-  form.append("itinerario", itinerarioAgenda.value);
-
-  await API.salvar(form);
-
-  limparAgenda();
-  carregarAgenda();
-  toast("Salvo ✅");
-}
-
-
-async function salvarSocial(){
-
-  const form = new FormData();
-
-  form.append("acao","novo");
-  form.append("agenda","AGENDA SERVIÇO SOCIAL");
-
-  form.append("data", dataSocial.value);
-  form.append("hora", periodoSocial.value);
-
-  form.append("passageiro", passageiroSocial.value);
-  form.append("setor","");
-  form.append("motivo", motivoSocial.value);
-  form.append("itinerario", itinerarioSocial.value);
-
-  await API.salvar(form);
-
-  limparSocial();
-  carregarSocial();
-  toast("Salvo ✅");
-}
-
-
-// =========================
-// EDIT / DELETE
-// =========================
-
-async function editarCampo(id, campo, valor, agenda){
-
-  const form = new FormData();
-  form.append("acao","editar_campo");
-  form.append("id",id);
-  form.append("campo",campo);
-  form.append("valor",valor);
-  form.append("agenda",agenda);
-
-  await API.salvar(form);
-}
-
-
-async function deletar(id, agenda){
-
-  if(!confirm("Deseja excluir?")) return;
-
-  const form = new FormData();
-  form.append("acao","deletar");
-  form.append("id",id);
-  form.append("agenda",agenda);
-
-  await API.salvar(form);
-
-  carregarAgenda();
-  carregarSocial();
-
-  toast("Excluído ✅");
-}
-
-
-// =========================
-// UTILS
-// =========================
-
-function limparAgenda(){
-  ["dataAgenda","horaAgenda","passageiroAgenda","setorAgenda","motivoAgenda","itinerarioAgenda"]
-  .forEach(id=>document.getElementById(id).value="");
-}
-
-function limparSocial(){
-  ["dataSocial","periodoSocial","passageiroSocial","motivoSocial","itinerarioSocial"]
-  .forEach(id=>document.getElementById(id).value="");
-}
-
-function mostrarTela(tela){
-
-  telaAgenda.style.display = tela === "agenda" ? "block" : "none";
-  telaSocial.style.display = tela === "social" ? "block" : "none";
-}
-
-
-// =========================
-// INIT
-// =========================
-
-function init(){
-  carregarAgenda();
-  carregarSocial();
-}
-
-init();
+load();
+setInterval(load,30000);
 
 </script>
 
