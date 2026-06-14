@@ -221,6 +221,18 @@ function badge(s){
   return `<span class="badge livre">🟢 LIVRE</span>`;
 }
 
+
+  function isStatusValido(s) {
+  s = String(s).toUpperCase();
+
+  return (
+    s.includes("MANUTEN") ||
+    s.includes("VIAGEM") ||
+    s.includes("ANDAMENTO")
+  );
+}
+
+
 /* ================= TABLE ================= */
 
 function table(headers,rows){
@@ -270,7 +282,10 @@ function renderKPIs(painel){
 async function load(){
 
   const [painel,agenda, agendass,veiculos,motoristas] = await Promise.all([
-    fetchSheet("LANÇAMENTOS","select B,C,D,E,F,G,X"),
+    fetchSheet("LANÇAMENTOS","select B,C,D,E,F,G,X"+
+               "where X contains 'MANUTEN' " +
+               "or X contains 'VIAGEM' " +
+               "or X contains 'ANDAMENTO'"),
     fetchSheet("VEÍCULOS","select B,V,M,N"),
     fetchSheet("MOTORISTAS","select A,B,C"),
     fetchSheet("AGENDA DO DIA","select B,C,D,E,F,G,H"),
