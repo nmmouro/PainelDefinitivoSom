@@ -277,7 +277,15 @@ async function load(){
     fetchSheet("AGENDA SERVIÇO SOCIAL","select B,C,D,F,G,H")
   ]);
 
-  const painelRows = painel.table.rows || [];
+  const painelRows = (painel.table.rows || []).filter(r => {
+  const v = (r.c || []).map(getCell);
+  const status = v[6]; // coluna Status (posição 6)
+  return isStatusValido(status);
+});
+
+  const agendalRows = painel.table.rows || [];
+
+  const agendassRows = painel.table.rows || [];
 
   renderKPIs(painelRows);
 
