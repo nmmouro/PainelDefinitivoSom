@@ -284,13 +284,17 @@ async function load(){
                "where X contains 'MANUTEN' " +
                "or X contains 'VIAGEM' " +
                "or X contains 'ANDAMENTO'"),
+    
     fetchSheet("VEÍCULOS","select B,V,M,N"),
     fetchSheet("MOTORISTAS","select A,B,C"),
     fetchSheet("AGENDA DO DIA","select B,C,D,E,F,G,H"),
     fetchSheet("AGENDA SERVIÇO SOCIAL","select B,C,D,F,G,H")
   ]);
 
-  const painelRows = painel.table.rows || [];
+  const painelRows = (painel.table.rows || []).filter(r => {
+    const v = (r.c || []).map(getCell);
+    return isStatusValido(v[6]);
+  });
 
  
   renderKPIs(painelRows);
