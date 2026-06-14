@@ -280,10 +280,14 @@ function renderKPIs(painel){
 async function load(){
 
   const [painel,agenda, agendass,veiculos,motoristas] = await Promise.all([
-    fetchSheet("LANÇAMENTOS","select B,C,D,E,F,G,X"+
-               "where X contains 'MANUTEN' " +
-               "or X contains 'VIAGEM' " +
-               "or X contains 'ANDAMENTO'"),
+   fetchSheet(
+      "LANÇAMENTOS",
+      "select B,C,D,E,F,G,X " +
+      "where X contains 'MANUTEN' " +
+      "or X contains 'VIAGEM' " +
+      "or X contains 'ANDAMENTO'"
+    ),
+
     
     fetchSheet("VEÍCULOS","select B,V,M,N"),
     fetchSheet("MOTORISTAS","select A,B,C"),
