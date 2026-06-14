@@ -267,7 +267,9 @@ async function load(){
   const [painel,veiculos,motoristas] = await Promise.all([
     fetchSheet("LANÇAMENTOS","select B,C,D,E,F,G,X"),
     fetchSheet("VEÍCULOS","select B,V,M,N"),
-    fetchSheet("MOTORISTAS","select A,B,C")
+    fetchSheet("MOTORISTAS","select A,B,C"),
+    fetchSheet("AGENDA DO DIA","select B,C,D,E,F,G,H"),
+    fetchSheet("AGENDA SERVIÇO SOCIAL","select B,C,D,F,G,H")
   ]);
 
   const painelRows = painel.table.rows || [];
@@ -290,7 +292,21 @@ async function load(){
   document.getElementById("painel").innerHTML = `
     <div class="card">
       <header>PAINEL OPERACIONAL</header>
-      ${table(["Data","Hora","Empregado","Veículo","Descrição","Destino","Status"],painelRows)}
+      ${table(["Data","Hora","Empregado","Veículo","Passageiro/ Setor/ Motivo","Itineráio","Status"],painelRows)}
+    </div>
+  `;
+
+  document.getElementById("agenda").innerHTML = `
+    <div class="card">
+      <header>AGENDA DO DIA</header>
+      ${table(["Data","Hora","Passageiro","Setor","Motivo","Itinerário","Status"],painelRows)}
+    </div>
+  `;
+
+  document.getElementById("agendass").innerHTML = `
+    <div class="card">
+      <header>AGENDA SERVIÇO SOCIAL</header>
+      ${table(["Data","Período","Passageiro","Motivo","Itinerário","Status"],painelRows)}
     </div>
   `;
 }
