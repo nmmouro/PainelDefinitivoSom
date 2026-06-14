@@ -281,9 +281,9 @@ async function load(){
 
   const [painel,agenda, agendass,veiculos,motoristas] = await Promise.all([
     fetchSheet("LANÇAMENTOS","select B,C,D,E,F,G,X"+
-               "where X contains 'MANUTEN' " +
-               "or X contains 'VIAGEM' " +
-               "or X contains 'ANDAMENTO'"),
+               "where X contains '🔧 MANUTENÇÃO' " +
+               "or X contains '✈ VIAGEM' " +
+               "or X contains '⏳ OCUPADO'"),
     
     fetchSheet("VEÍCULOS","select B,V,M,N"),
     fetchSheet("MOTORISTAS","select A,B,C"),
