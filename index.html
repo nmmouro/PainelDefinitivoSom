@@ -230,20 +230,50 @@ function badge(s){
   return `<span class="badge livre">🟢 LIVRE</span>`;
 }
 
+  /* ================= VEÍCULO OCUPADO ================= */
+
+function getPlacasOcupadas(painelRows){
+  const placas = new Set();
+
+  painelRows.forEach(r=>{
+    const v = (r.c || []).map(getCell);
+    const placa = String(v[3] || "").toUpperCase().trim();
+
+    if(placa) placas.add(placa);
+  });
+
+  return placas;
+}
+
+
 
 /* ================= TABLE ================= */
 
-function table(headers,rows){
+function tableVeiculos(headers, rows, placasOcupadas){
 
   return `
     <table>
-      <thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
+      <thead>
+        <tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr>
+      </thead>
       <tbody>
         ${rows.map(r=>{
-          const v=(r.c||[]).map(getCell);
-          return `<tr>${v.map((c,i)=>`
-            <td>${i === v.length-1 ? badge(c) : c}</td>
-          `).join("")}</tr>`;
+          const v = (r.c || []).map(getCell);
+
+          const placa = String(v[0] || "").toUpperCase().trim();
+          let status = String(v[1] || "");
+
+          // 🔥 REGRA: veículo presente no painel = OCUPADO
+          if (placasOcupadas.has(placa)) {
+            status = "OCUPADO";
+          }
+
+          return `<tr>
+            <td>${v[0]}</td>
+            <td>${badge(status)}</td>
+            <td>${v[2]}</td>
+            <td>${v[3]}</td>
+          </tr>`;
         }).join("")}
       </tbody>
     </table>
@@ -279,7 +309,7 @@ function renderKPIs(painel){
 
 async function load(){
 
-  const [painel,agenda, agendass,veiculos,motoristas] = await Promise.all([
+  const [painel,veiculos,motoristas,agenda, agendass] = await Promise.all([
    fetchSheet(
       "LANÇAMENTOS",
       "select B,C,D,E,F,G,X " +
@@ -299,6 +329,8 @@ async function load(){
     const v = (r.c || []).map(getCell);
     return isStatusValido(v[6]);
   });
+  
+  const placasOcupadas = getPlacasOcupadas(painelRows);
 
  
   renderKPIs(painelRows);
@@ -307,7 +339,7 @@ async function load(){
 
     <div class="card">
       <header>VEÍCULOS</header>
-      ${table(["Placa","Status","Km","Comb."],veiculos.table.rows)}
+      ${table(["Placa","Status","Km","Comb."],veiculos.table.rows, placasOcupadas)}
     </div>
 
     <div class="card">
