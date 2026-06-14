@@ -223,9 +223,9 @@ function badge(s){
 
   s = String(s).toUpperCase();
 
-  if(s.includes("🔧 MANUTENÇÃO")) return `<span class="badge manutencao">🔧 MANUTENÇÃO</span>`;
-  if(s.includes("✈ VIAGEM")) return `<span class="badge viagem">✈ VIAGEM</span>`;
-  if(s.includes("⏳ OCUPADO")) return `<span class="badge ocupado">⏳ OCUPADO</span>`;
+  if(s.includes("MANUTEN")) return `<span class="badge manutencao">🔧 MANUTENÇÃO</span>`;
+  if(s.includes("VIAGEM")) return `<span class="badge viagem">✈ VIAGEM</span>`;
+  if(s.includes("OCUPADO")) return `<span class="badge ocupado">⏳ OCUPADO</span>`;
 
   return `<span class="badge livre">🟢 LIVRE</span>`;
 }
