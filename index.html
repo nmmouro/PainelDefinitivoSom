@@ -319,7 +319,7 @@ async function load(){
   document.getElementById("painel").innerHTML = `
     <div class="card">
       <header>PAINEL OPERACIONAL</header>
-      ${table(["Data","Hora","Empregado","Veículo","Passageiro/ Setor/ Motivo","Itineráio","Status"],painelRows)}
+      ${table(["Data","Hora","Empregado","Veículo","Passageiro/ Setor/ Motivo","Itineráio","Status"],painel.table.Rows)}
     </div>
   `;
 
@@ -333,7 +333,7 @@ async function load(){
   document.getElementById("agendass").innerHTML = `
     <div class="card">
       <header>AGENDA SERVIÇO SOCIAL</header>
-      ${table(["Data","Período","Passageiro","Motivo","Itinerário","Status"],agenda.table.rows)}
+      ${table(["Data","Período","Passageiro","Motivo","Itinerário","Status"],agendass.table.rows)}
     </div>
   `;
 }
