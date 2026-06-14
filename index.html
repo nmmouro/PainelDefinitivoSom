@@ -255,6 +255,39 @@ function table(headers,rows){
   `;
 }
 
+  function tableVeiculos(headers, rows, placasOcupadas){
+
+  return `
+    <table>
+      <thead>
+        <tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr>
+      </thead>
+      <tbody>
+        ${rows.map(r=>{
+          const v = (r.c || []).map(getCell);
+
+          const placaOriginal = String(v[0] || "");
+          const placaNormalizada = placaOriginal.toUpperCase().trim();
+
+          let status = String(v[1] || "");
+
+          // ✅ REGRA DE NEGÓCIO
+          if (placasOcupadas.has(placaNormalizada)) {
+            status = "OCUPADO"; // <- FORÇA ESCRITA
+          }
+
+          return `<tr>
+            <td>${placaOriginal}</td>
+            <td>${status}</td> <!-- 🔥 escreve OCUPADO direto -->
+            <td>${v[2]}</td>
+            <td>${v[3]}</td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
 
 /* ================= KPIs ================= */
 
@@ -305,7 +338,8 @@ async function load(){
     const v = (r.c || []).map(getCell);
     return isStatusValido(v[6]);
   });
-  
+
+  const placasOcupadas = getPlacasOcupadas(painelRows);
   
 
  
@@ -315,7 +349,7 @@ async function load(){
 
     <div class="card">
       <header>VEÍCULOS</header>
-      ${table(["Placa","Status","Km","Comb."],veiculos.table.rows)}
+      ${table(["Placa","Status","Km","Comb."],veiculos.table.rows, placasOcupadas)}
     </div>
 
     <div class="card">
